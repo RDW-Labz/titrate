@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Btn } from "@/components/ui";
+import { toast } from "@/components/toast";
 import { doseOn } from "@/lib/titration";
 import { addDays, cycleInfo, dayKey, inCycle, loggedOn, scheduledOn } from "@/lib/schedule";
 import { useStore } from "@/lib/store";
@@ -58,9 +59,36 @@ export default function SummaryPage() {
             {now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
           </p>
         </div>
-        <Btn size="sm" className="no-print" onClick={() => window.print()}>
-          Print
-        </Btn>
+        <div className="no-print flex gap-2">
+          <Btn
+            size="sm"
+            variant="quiet"
+            onClick={async () => {
+              const lines = [
+                `Protocol — ${now.toLocaleDateString()}`,
+                ...rows.map(
+                  ({ c, due, logged }) =>
+                    `• ${c.name} ${doseOn(c, now)} ${c.unit}, ${scheduleLabel(c)}${due ? ` — ${Math.round((logged / due) * 100)}% on time (${logged}/${due})` : ""}`,
+                ),
+                latestW ? `Weight ${latestW.lb} lb${deltaW !== null ? ` (${deltaW > 0 ? "+" : ""}${deltaW})` : ""}` : "",
+                Object.keys(symptomCounts).length
+                  ? `Side effects: ${Object.entries(symptomCounts).map(([k, v]) => `${k} ×${v}`).join(", ")}`
+                  : "",
+              ].filter(Boolean);
+              try {
+                await navigator.clipboard.writeText(lines.join("\n"));
+                toast("Copied");
+              } catch {
+                toast("Clipboard blocked");
+              }
+            }}
+          >
+            Copy
+          </Btn>
+          <Btn size="sm" className="no-print" onClick={() => window.print()}>
+            Print
+          </Btn>
+        </div>
       </header>
 
       <section className="mt-3 overflow-hidden rounded-[20px] bg-card shadow-card ring-1 ring-black/[0.03]">

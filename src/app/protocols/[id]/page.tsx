@@ -28,6 +28,8 @@ export default function ProtocolDetailPage() {
   const [editingDose, setEditingDose] = useState<string | null>(null);
   const [stepDate, setStepDate] = useState("");
   const [stepDose, setStepDose] = useState("");
+  const [missedAt, setMissedAt] = useState("");
+  const [missedDose, setMissedDose] = useState("");
 
   const compound = compounds.find((c) => c.id === id);
   if (!compound) {
@@ -257,6 +259,31 @@ export default function ProtocolDetailPage() {
 
         <div className="mt-4 border-t border-line pt-4">
           <p className="text-[13.5px] font-semibold">History</p>
+          <Disclosure nested title="Log a missed dose" className="mt-1">
+            <div className="mt-2 flex items-end gap-2">
+              <Field label="When" className="flex-1">
+                <input type="date" value={missedAt} onChange={(e) => setMissedAt(e.target.value)} />
+              </Field>
+              <Field label={compound.unit} className="w-[88px]">
+                <input inputMode="decimal" value={missedDose} placeholder={String(inForce)} onChange={(e) => setMissedDose(e.target.value)} />
+              </Field>
+              <Btn
+                variant="line"
+                disabled={!missedAt}
+                onClick={() => {
+                  const [y, m, d] = missedAt.split("-").map(Number);
+                  const at = new Date(y, m - 1, d, 9, 0, 0);
+                  const dose = Number(missedDose) > 0 ? Number(missedDose) : inForce;
+                  actions.logDose({ compoundId: compound.id, dose, unit: compound.unit, at });
+                  toast(`Logged ${dose} ${compound.unit} on ${missedAt}`);
+                  setMissedAt("");
+                  setMissedDose("");
+                }}
+              >
+                Add
+              </Btn>
+            </div>
+          </Disclosure>
           <ul className="mt-1 divide-y divide-line">
             {history.length === 0 ? (
               <li className="py-2 text-[12.5px] text-muted">Nothing logged yet.</li>

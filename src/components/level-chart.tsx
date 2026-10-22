@@ -13,6 +13,7 @@ export function LevelChart({
   futureMarkers = [],
   nowAt = 0.5,
   footer = true,
+  dark = false,
 }: {
   values: number[];
   height?: number;
@@ -20,6 +21,7 @@ export function LevelChart({
   futureMarkers?: number[];
   nowAt?: number;
   footer?: boolean;
+  dark?: boolean;
 }) {
   const id = useId().replace(/[:]/g, "");
   const w = 320;
@@ -81,10 +83,10 @@ export function LevelChart({
               x2={w}
               y1={y}
               y2={y}
-              stroke="var(--color-line)"
+              stroke={dark ? "#ffffff" : "var(--color-line)"}
               strokeWidth="1"
               strokeDasharray={f === 1 ? "0" : "3 5"}
-              opacity={f === 1 ? 0.85 : 0.5}
+              opacity={dark ? (f === 1 ? 0.22 : 0.12) : f === 1 ? 0.85 : 0.5}
               vectorEffect="non-scaling-stroke"
             />
           );
@@ -127,10 +129,10 @@ export function LevelChart({
           x2={nowPt[0]}
           y1={padTop - 6}
           y2={height - padBottom}
-          stroke="var(--color-ink)"
+          stroke={dark ? "#ffffff" : "var(--color-ink)"}
           strokeWidth="1"
           strokeDasharray="2 4"
-          opacity="0.25"
+          opacity={dark ? 0.35 : 0.25}
           vectorEffect="non-scaling-stroke"
         />
 

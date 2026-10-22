@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { GearIcon } from "@/components/icons";
+import { LevelChart } from "@/components/level-chart";
 import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
 import { Btn, CountdownRing, Empty } from "@/components/ui";
 import { toast } from "@/components/toast";
@@ -11,6 +12,7 @@ import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/li
 import { budDaysLeft } from "@/lib/vial";
 import { actions, useStore } from "@/lib/store";
 import { doseOn } from "@/lib/titration";
+import { levelNow, levelSeries } from "@/lib/levels";
 
 const SYMPTOMS = ["Nausea", "Fatigue", "Headache", "Constipation", "Bloating"];
 
@@ -69,6 +71,8 @@ export default function TodayPage() {
   const peptide = hero ? PEPTIDE_BY_ID.get(hero.c.peptideId) : undefined;
   const last = hero ? lastDose(doses, hero.c.id) : undefined;
 
+  const heroSeries = hero ? levelSeries(doses, hero.c, now, 10, 5) : null;
+  const heroNow = hero ? levelNow(doses, hero.c, now) : 0;
   const heroVial = hero ? vials.find((v) => v.id === hero.c.vialId) : undefined;
   const heroBud = heroVial ? budDaysLeft(heroVial, now) : null;
   const vialWarn =
@@ -146,7 +150,27 @@ export default function TodayPage() {
               {doseOn(hero.c, now)} {hero.c.unit} · {peptide?.frequency ?? "custom"}
             </p>
 
-            <div className="mt-5 w-full">
+            {heroSeries ? (
+              <div className="mt-4 w-full rounded-2xl bg-white/[0.06] px-2 pt-2 pb-1">
+                <div className="level-dark">
+                  <LevelChart
+                    values={heroSeries.values}
+                    height={58}
+                    markers={heroSeries.markers}
+                    futureMarkers={heroSeries.futureMarkers}
+                    nowAt={heroSeries.nowAt}
+                    footer={false}
+                    dark
+                  />
+                </div>
+                <p className="num mt-0.5 flex justify-between px-1 text-[10.5px] text-white/45">
+                  <span>now {Math.round(heroNow)}%</span>
+                  <span>next peak {Math.round(heroSeries.nextPeak)}%</span>
+                </p>
+              </div>
+            ) : null}
+
+            <div className="mt-4 w-full">
               <LogDoseButton
                 compound={hero.c}
                 variant="white"
