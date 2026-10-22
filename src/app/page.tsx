@@ -20,6 +20,7 @@ export default function TodayPage() {
   const { compounds, doses, foods, goals, symptoms, vials } = useStore();
   const now = new Date();
   const [flash, setFlash] = useState<string | null>(null);
+  const [symptomsOpen, setSymptomsOpen] = useState(false);
 
   useEffect(() => {
     if (!flash) return;
@@ -198,21 +199,19 @@ export default function TodayPage() {
         </section>
       ) : null}
 
-      <div className="enter mt-3 flex items-end justify-between rounded-[22px] bg-card px-4 py-3 shadow-card" style={{ animationDelay: "70ms" }}>
-        {weekDays.map((d) => {
-          const count = d.logged;
-          const done = count > 0;
-          return (
-            <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
-              <span
-                className={`size-2 rounded-full ${
-                  done ? "bg-accent" : d.skipped ? "border border-accent bg-transparent" : d.due ? "bg-warn/60" : "bg-line"
-                }`}
-              />
-              <span className={`text-[10.5px] ${d.today ? "font-semibold text-ink" : "text-muted"}`}>{d.letter}</span>
-            </div>
-          );
-        })}
+      <div className="enter mt-2 flex items-center gap-3 px-2" style={{ animationDelay: "70ms" }}>
+        <div className="flex flex-1 items-center gap-1.5">
+          {weekDays.map((d) => (
+            <span
+              key={d.key}
+              title={d.key}
+              className={`size-1.5 rounded-full ${
+                d.logged ? "bg-accent" : d.skipped ? "border border-accent" : d.due ? "bg-warn/60" : "bg-line"
+              } ${d.today ? "ring-2 ring-accent/25" : ""}`}
+            />
+          ))}
+        </div>
+        <span className="num text-[11px] text-muted">{weekDays.filter((d) => d.logged).length} of 7 days</span>
       </div>
 
       {others.length > 0 ? (
@@ -260,38 +259,76 @@ export default function TodayPage() {
         <span className="num text-[12.5px] text-muted">{kcal} kcal</span>
       </Link>
 
-      <section className="enter mt-3 rounded-[22px] bg-card px-4 py-4 shadow-card" style={{ animationDelay: "250ms" }}>
-        <div className="flex items-baseline justify-between">
-          <p className="text-[15px] font-medium">Any side effects?</p>
-          <Link href="/symptoms" className="press -my-1 py-1 text-[12px] font-medium text-accent">
-            {todaySymptoms.length ? `${todaySymptoms.length} today ›` : "history ›"}
-          </Link>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
+      <button
+        onClick={() => setSymptomsOpen(true)}
+        className="enter press mt-2.5 flex w-full items-center justify-between rounded-[22px] bg-card px-4 py-3.5 shadow-card"
+        style={{ animationDelay: "250ms" }}
+      >
+        <span className="text-[15px] font-medium">Any side effects?</span>
+        <span className="flex items-center gap-2 text-[12px] text-muted">
+          {todaySymptoms.length ? `${todaySymptoms.length} today` : "none logged"}
+          <span aria-hidden="true" className="text-[16px]">›</span>
+        </span>
+      </button>
+
+      <SymptomSheet
+        open={symptomsOpen}
+        onClose={() => setSymptomsOpen(false)}
+        logged={todaySymptoms}
+        onToggle={(name) => {
+          const hits = todaySymptoms.filter((x) => x.name === name);
+          if (hits.length) hits.forEach((x) => actions.deleteSymptom(x.id));
+          else {
+            actions.logSymptom(name);
+            toast(`Noted ${name.toLowerCase()}`);
+          }
+        }}
+      />
+    </div>
+  );
+}
+
+function SymptomSheet({
+  open,
+  onClose,
+  logged,
+  onToggle,
+}: {
+  open: boolean;
+  onClose: () => void;
+  logged: { id: string; name: string }[];
+  onToggle: (name: string) => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-30 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Side effects">
+      <button className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" onClick={onClose} aria-label="Close" />
+      <div className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))]">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
+        <p className="text-[16px] font-semibold">Any side effects?</p>
+        <p className="mt-0.5 text-[12.5px] text-muted">Tap what you feel today — tap again to remove.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
           {SYMPTOMS.map((name) => {
-            const hit = todaySymptoms.filter((x) => x.name === name);
+            const hit = logged.filter((x) => x.name === name).length;
             return (
               <button
                 key={name}
-                onClick={() => {
-                  if (hit.length) hit.forEach((x) => actions.deleteSymptom(x.id));
-                  else {
-                    actions.logSymptom(name);
-                    toast(`Noted ${name.toLowerCase()}`);
-                  }
-                }}
-                aria-pressed={hit.length > 0}
-                className={`press rounded-full px-3 py-1.5 text-[13px] font-medium ${
-                  hit.length ? "bg-warn-soft text-warn" : "bg-paper text-muted"
+                onClick={() => onToggle(name)}
+                aria-pressed={hit > 0}
+                className={`press rounded-full px-3.5 py-2 text-[13.5px] font-medium ${
+                  hit ? "bg-warn-soft text-warn" : "bg-paper text-muted"
                 }`}
               >
-                {hit.length > 1 ? `${hit.length}× ` : ""}
+                {hit > 1 ? `${hit}× ` : ""}
                 {name}
               </button>
             );
           })}
         </div>
-      </section>
+        <Link href="/symptoms" className="press mt-4 block text-center text-[13px] font-medium text-accent">
+          See the last 30 days ›
+        </Link>
+      </div>
     </div>
   );
 }
