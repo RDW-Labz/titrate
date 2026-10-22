@@ -118,7 +118,7 @@ export default function PeptidesPage() {
         ) : null}
       </div>
 
-      {query && active.length + archived.length + libraryHits.length === 0 ? (
+      {query && active.length + archived.length + libraryHits.length + pages.length === 0 ? (
         <p className="mt-4 px-1 text-[13px] text-muted">Nothing matches “{q}”.</p>
       ) : null}
 
