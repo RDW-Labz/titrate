@@ -9,6 +9,12 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     background_color: "#edf1f5",
     theme_color: "#101c26",
+    shortcuts: [
+      { name: "Log today's dose", short_name: "Log", url: "/" },
+      { name: "Reconstitution calculator", short_name: "Calc", url: "/calc" },
+      { name: "Search peptides", short_name: "Search", url: "/protocols?focus=search" },
+      { name: "Clinician summary", short_name: "Summary", url: "/summary" },
+    ],
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },

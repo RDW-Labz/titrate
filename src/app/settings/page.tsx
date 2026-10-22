@@ -6,6 +6,7 @@ import { Btn, PageTitle } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { REMINDERS_KEY } from "@/components/reminders";
 import { EMPTY, actions, useStore } from "@/lib/store";
+import { dosesIcs } from "@/lib/ics";
 import type { State } from "@/lib/types";
 
 const KEY = "titrate.v1";
@@ -139,6 +140,23 @@ export default function SettingsPage() {
           >
             Doses CSV
           </Btn>
+          <Btn
+            size="sm"
+            variant="line"
+            onClick={() => {
+              const ics = dosesIcs(state.compounds, new Date());
+              if (!ics.includes("BEGIN:VEVENT")) return toast("Nothing scheduled to export");
+              const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "titrate-schedule.ics";
+              a.click();
+              URL.revokeObjectURL(url);
+              toast("8 weeks of doses, ready to add to your calendar");
+            }}
+          >
+            Calendar
+          </Btn>
           <Btn size="sm" variant="line" onClick={() => fileRef.current?.click()}>
             Restore
           </Btn>
@@ -160,6 +178,8 @@ export default function SettingsPage() {
         </div>
         <p className="num mt-1 text-[12px] text-muted">
           {state.compounds.length} peptides · {state.doses.length} doses · {kb} KB on this device
+          <br />
+          Calendar exports the next 8 weeks as .ics — Apple and Google Calendar both read it.
         </p>
       </section>
 

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { reconstitute, unitsForDose, formatUnits } from "../src/lib/recon.ts";
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
 import { levelSeries, levelWord, levelNow } from "../src/lib/levels.ts";
+import { dosesIcs } from "../src/lib/ics.ts";
 import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
@@ -176,4 +177,22 @@ test("level words follow the percentages", () => {
   assert.equal(levelWord(50), "rising");
   assert.equal(levelWord(100), "near peak");
   assert.equal(levelWord(180), "stacked");
+});
+
+test("calendar export writes one event per scheduled dose and nothing while off-cycle", () => {
+  const now = new Date(2026, 0, 5, 8);
+  const daily = compound({ id: "c-daily" });
+  const weekly = compound({ id: "c-weekly", name: "Tirzepatide", peptideId: "tirzepatide", dose: 2500, schedule: { kind: "every", everyDays: 7 } });
+  // started in December, so the two weeks after Jan 5 sit inside a long off phase
+  const off = compound({ id: "c-off", cycle: { onDays: 7, offDays: 60 }, startDate: "2025-12-01" });
+  const mock = compound({ id: "c-arch", archived: true });
+
+  const ics = dosesIcs([daily, weekly, off, mock], now, 2);
+  const events = ics.split("BEGIN:VEVENT").length - 1;
+  assert.equal(events, 14 + 2, "14 daily doses plus 2 weekly ones in two weeks");
+  assert.ok(ics.includes("SUMMARY:BPC-157 250 mcg"));
+  assert.ok(ics.includes("SUMMARY:Tirzepatide 2500 mcg"));
+  assert.ok(!ics.includes("c-arch"), "archived compounds are skipped");
+  assert.ok(ics.startsWith("BEGIN:VCALENDAR") && ics.trimEnd().endsWith("END:VCALENDAR"));
+  assert.ok(ics.includes("\r\n"), "CRLF line endings, as the spec requires");
 });
