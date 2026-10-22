@@ -62,7 +62,17 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[460px] flex-col">
       <main className="flex-1 px-4 pb-32">
-        {ready ? children : <div className="pt-24 text-center text-[14px] text-muted">Opening your day…</div>}
+        {ready ? (
+          children
+        ) : (
+          // matches the real layout closely enough that the swap barely moves
+          <div className="pt-3" aria-hidden="true">
+            <div className="ml-1 h-7 w-24 animate-pulse rounded-full bg-line/70" />
+            <div className="mt-3 h-[336px] animate-pulse rounded-[30px] bg-hero/85" />
+            <div className="mt-3 h-[66px] animate-pulse rounded-[22px] bg-card shadow-card" />
+            <div className="mt-2.5 h-[66px] animate-pulse rounded-[22px] bg-card shadow-card" />
+          </div>
+        )}
       </main>
       <nav
         aria-label="Main"
