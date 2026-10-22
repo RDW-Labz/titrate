@@ -8,13 +8,14 @@ import { Btn, CountdownRing, Empty } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
 import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
+import { budDaysLeft } from "@/lib/vial";
 import { actions, useStore } from "@/lib/store";
 import { doseOn } from "@/lib/titration";
 
 const SYMPTOMS = ["Nausea", "Fatigue", "Headache", "Constipation", "Bloating"];
 
 export default function TodayPage() {
-  const { compounds, doses, foods, goals, symptoms } = useStore();
+  const { compounds, doses, foods, goals, symptoms, vials } = useStore();
   const now = new Date();
   const [flash, setFlash] = useState<string | null>(null);
 
@@ -68,6 +69,17 @@ export default function TodayPage() {
   const peptide = hero ? PEPTIDE_BY_ID.get(hero.c.peptideId) : undefined;
   const last = hero ? lastDose(doses, hero.c.id) : undefined;
 
+  const heroVial = hero ? vials.find((v) => v.id === hero.c.vialId) : undefined;
+  const heroBud = heroVial ? budDaysLeft(heroVial, now) : null;
+  const vialWarn =
+    heroBud === null
+      ? null
+      : heroBud < 0
+        ? { days: heroBud, text: "Vial is past its use-by date — mix a fresh one." }
+        : heroBud <= 3
+          ? { days: heroBud, text: `Vial use-by in ${heroBud} day${heroBud === 1 ? "" : "s"} — mix a fresh one.` }
+          : null;
+
   const total = hero?.next ? hero.next.at.getTime() - (last ? +new Date(last.at) : +now - 86_400_000) : 1;
   const elapsed = last ? +now - +new Date(last.at) : total;
   const progress = hero?.due ? 1 : Math.min(1, Math.max(0.04, elapsed / Math.max(1, total)));
@@ -80,6 +92,7 @@ export default function TodayPage() {
       letter: d.toLocaleDateString(undefined, { weekday: "narrow" }),
       today: k === dayKey(now),
       logged: doses.filter((x) => !x.skipped && dayKey(new Date(x.at)) === k).length,
+      skipped: doses.some((x) => x.skipped && dayKey(new Date(x.at)) === k),
       due: compounds.some((c) => isDueOn(c, doses, d)),
     };
   });
@@ -145,6 +158,9 @@ export default function TodayPage() {
             <p className="mt-2.5 text-[12px] text-white/40">
               {last ? `Last ${humanIn(new Date(last.at), now)}${last.site ? ` · ${last.site}` : ""}` : "First dose"}
             </p>
+            {vialWarn ? (
+              <p className={`mt-1 text-[12px] ${vialWarn.days < 0 ? "text-[#ff9d8f]" : "text-[#f0c98a]"}`}>{vialWarn.text}</p>
+            ) : null}
           </div>
         </section>
       ) : null}
@@ -155,7 +171,11 @@ export default function TodayPage() {
           const done = count > 0;
           return (
             <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
-              <span className={`size-2 rounded-full ${done ? "bg-accent" : d.due ? "bg-warn/60" : "bg-line"}`} />
+              <span
+                className={`size-2 rounded-full ${
+                  done ? "bg-accent" : d.skipped ? "border border-accent bg-transparent" : d.due ? "bg-warn/60" : "bg-line"
+                }`}
+              />
               <span className={`text-[10.5px] ${d.today ? "font-semibold text-ink" : "text-muted"}`}>{d.letter}</span>
             </div>
           );

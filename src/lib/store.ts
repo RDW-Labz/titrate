@@ -130,6 +130,11 @@ export const actions = {
     update((s) => ({ ...s, doses: [...s.doses, dose] }));
     return dose;
   },
+  skipDose(compoundId: string, dose: number, unit: Compound["unit"]): DoseLog {
+    const entry: DoseLog = { id: uid(), compoundId, dose, unit, at: new Date().toISOString(), skipped: true };
+    update((s) => ({ ...s, doses: [...s.doses, entry] }));
+    return entry;
+  },
   deleteDose(id: string) {
     update((s) => ({ ...s, doses: s.doses.filter((d) => d.id !== id) }));
   },

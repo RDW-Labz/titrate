@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { reconstitute, unitsForDose, formatUnits } from "../src/lib/recon.ts";
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
-import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween } from "../src/lib/schedule.ts";
+import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
 const hours = (h: number) => h * 3_600_000;
@@ -138,4 +138,14 @@ test("vial use-by is 28 days after mixing", () => {
   assert.equal(dayKey(useBy), "2026-01-29");
   assert.equal(daysBetween(new Date(2026, 0, 20), useBy), 9);
   assert.equal(daysBetween(new Date(2026, 1, 5), useBy), -7);
+});
+
+test("a skipped dose satisfies the day without counting as taken", () => {
+  const c = compound();
+  const now = new Date(2026, 0, 10);
+  const skipped: DoseLog = { id: "s1", compoundId: "c1", at: now.toISOString(), dose: 250, unit: "mcg", skipped: true };
+  assert.equal(isDueOn(c, [skipped], now), false, "no longer due");
+  assert.equal(skippedOn([skipped], "c1", now), true);
+  assert.equal(anyLogOn([skipped], "c1", now)?.skipped, true);
+  assert.equal(streak([skipped], now), 0, "a skip is not a logged day");
 });

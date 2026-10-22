@@ -66,8 +66,18 @@ export function loggedOn(doses: DoseLog[], compoundId: string, date: Date): Dose
   return doses.find((d) => d.compoundId === compoundId && dayKey(new Date(d.at)) === key && !d.skipped);
 }
 
+/** any entry for that day, skipped included — a skipped dose stops it being "due" */
+export function anyLogOn(doses: DoseLog[], compoundId: string, date: Date): DoseLog | undefined {
+  const key = dayKey(date);
+  return doses.find((d) => d.compoundId === compoundId && dayKey(new Date(d.at)) === key);
+}
+
+export function skippedOn(doses: DoseLog[], compoundId: string, date: Date): boolean {
+  return !!anyLogOn(doses, compoundId, date)?.skipped;
+}
+
 export function isDueOn(c: Compound, doses: DoseLog[], date: Date): boolean {
-  return scheduledOn(c, date) && inCycle(c, date) && !loggedOn(doses, c.id, date);
+  return scheduledOn(c, date) && inCycle(c, date) && !anyLogOn(doses, c.id, date);
 }
 
 /** next unlogged scheduled day, starting today; null if the schedule never lands again */
