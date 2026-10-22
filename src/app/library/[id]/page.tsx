@@ -22,7 +22,7 @@ export default function PeptidePage() {
 
   return (
     <div>
-      <Link href="/library" className="text-[12.5px] text-accent">
+      <Link href="/library" className="press inline-block py-1.5 text-[12.5px] text-accent">
         ← Library
       </Link>
       <PageTitle meta={p.aka ?? CATEGORY_LABEL[p.category]}>{p.name}</PageTitle>

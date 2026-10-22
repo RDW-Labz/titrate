@@ -37,7 +37,7 @@ export default function SettingsPage() {
 
   return (
     <div className="pt-3">
-      <Link href="/" className="press text-[14px] font-medium text-accent">
+      <Link href="/" className="press -my-1 inline-block py-1.5 text-[14px] font-medium text-accent">
         ‹ Today
       </Link>
       <PageTitle>Settings</PageTitle>

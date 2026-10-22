@@ -84,7 +84,7 @@ export function LogDoseButton({
         </div>
         <button
           onClick={log}
-          className={`press mt-1.5 w-full text-center text-[12px] underline underline-offset-2 ${
+          className={`press mt-0.5 w-full py-1.5 text-center text-[12px] underline underline-offset-2 ${
             tone === "dark" ? "text-white/65" : "text-muted"
           }`}
         >
@@ -127,10 +127,10 @@ export function LogDoseButton({
         onPick={setSite}
       />
       <div className={`mt-1.5 flex items-center justify-between text-[12px] ${tone === "dark" ? "text-white/65" : "text-muted"}`}>
-        <button onClick={() => setPicker(true)} className="press underline underline-offset-2">
+        <button onClick={() => setPicker(true)} className="press -my-1 py-1.5 underline underline-offset-2">
           Site: {site.toLowerCase()}
         </button>
-        <button onClick={skip} className="press underline underline-offset-2">
+        <button onClick={skip} className="press -my-1 py-1.5 underline underline-offset-2">
           Skip today
         </button>
       </div>

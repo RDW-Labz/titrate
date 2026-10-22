@@ -48,7 +48,7 @@ export default function SummaryPage() {
   return (
     <div className="pt-3">
       <div className="no-print">
-        <Link href="/settings" className="press text-[14px] font-medium text-accent">
+        <Link href="/settings" className="press -my-1 inline-block py-1.5 text-[14px] font-medium text-accent">
           ‹ Settings
         </Link>
       </div>
