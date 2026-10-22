@@ -59,7 +59,7 @@ export default function ProtocolDetailPage() {
       </Link>
 
       <div className="mt-2 px-1">
-        <h1 className="text-[27px] leading-tight font-semibold tracking-[-0.02em]">{compound.name}</h1>
+        <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.025em]">{compound.name}</h1>
         <p className="num mt-1 text-[14px] text-muted">
           {inForce} {compound.unit} · {scheduleLabel(compound)}
         </p>

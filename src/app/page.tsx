@@ -23,21 +23,34 @@ export default function TodayPage() {
 
   if (compounds.length === 0) {
     return (
-      <div className="pt-4">
+      <div className="pt-3">
         <h1 className="px-1 text-[28px] font-semibold tracking-[-0.025em]">Today</h1>
-        <div className="mt-4">
-          <Empty title="Let's track something" body="Add a peptide and this screen becomes one big button: what's due, tap, done.">
+        <section className="enter mt-3 rounded-[30px] bg-hero px-5 py-6 text-white">
+          <div className="flex items-center gap-5">
+            <CountdownRing progress={0.72} top="Next dose" big="—" bottom="nothing yet" size={132} />
+            <div className="min-w-0">
+              <p className="text-[17px] leading-tight font-semibold">Your protocol starts here</p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-white/55">
+                Pick a peptide. We fill in the dose, schedule and vial — then this screen is one tap a day.
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 flex flex-col gap-2">
             <Link
               href="/protocols/new"
-              className="press rounded-2xl bg-accent px-4 py-3.5 text-[16px] font-semibold text-white"
+              className="press rounded-2xl bg-white px-4 py-3.5 text-center text-[16px] font-semibold text-hero"
             >
               Add a peptide
             </Link>
-            <Btn variant="quiet" onClick={() => actions.seed()}>
+            <Btn variant="quiet" className="!bg-white/10 !text-white" onClick={() => actions.seed()}>
               Show me a sample
             </Btn>
-          </Empty>
-        </div>
+          </div>
+        </section>
+        <p className="mt-3 px-1 text-[12.5px] leading-relaxed text-muted">
+          What you get: a countdown ring, one-tap logging with the syringe units already worked out, and a
+          history you can edit.
+        </p>
       </div>
     );
   }

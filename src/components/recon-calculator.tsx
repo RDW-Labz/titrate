@@ -1,24 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { Btn, Field, Pill, Stat } from "./ui";
+import { useEffect, useState } from "react";
+import { Btn, Field, Stat } from "./ui";
 import { SYRINGES, formatUnits, reconstitute } from "@/lib/recon";
-import { actions, useStore } from "@/lib/store";
+import { actions } from "@/lib/store";
 import type { Compound, Vial } from "@/lib/types";
 
-export function ReconCalculator({
-  saveFor,
-  initial,
-}: {
-  saveFor?: Compound;
-  initial?: Partial<Vial>;
-}) {
-  const [vialMg, setVialMg] = useState(String(initial?.totalMg ?? 5));
-  const [waterMl, setWaterMl] = useState(String(initial?.waterMl ?? 2));
-  const [dose, setDose] = useState(String(saveFor?.dose ?? 250));
-  const [syringeId, setSyringeId] = useState("u100-10");
+const LAST = "titrate.calc";
+
+type LastCalc = { vialMg: string; waterMl: string; dose: string; syringeId: string };
+
+function lastCalc(): LastCalc | null {
+  try {
+    return JSON.parse(localStorage.getItem(LAST) ?? "null") as LastCalc | null;
+  } catch {
+    return null;
+  }
+}
+
+export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; initial?: Partial<Vial> }) {
+  // standalone use remembers the last mix; a protocol's own vial always wins
+  const [seed] = useState<LastCalc | null>(() => (initial || saveFor ? null : lastCalc()));
+  const [vialMg, setVialMg] = useState(String(initial?.totalMg ?? seed?.vialMg ?? 5));
+  const [waterMl, setWaterMl] = useState(String(initial?.waterMl ?? seed?.waterMl ?? 2));
+  const [dose, setDose] = useState(String(saveFor?.dose ?? seed?.dose ?? 250));
+  const [syringeId, setSyringeId] = useState(seed?.syringeId ?? "u100-10");
   const [saved, setSaved] = useState(false);
-  const { compounds } = useStore();
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LAST, JSON.stringify({ vialMg, waterMl, dose, syringeId }));
+    } catch {
+      // ignore storage failures — the calculator still works in memory
+    }
+  }, [vialMg, waterMl, dose, syringeId]);
 
   const syringe = SYRINGES.find((s) => s.id === syringeId) ?? SYRINGES[2];
   const result = reconstitute({
@@ -32,10 +47,10 @@ export function ReconCalculator({
   return (
     <div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Vial size (mg)">
+        <Field label="Vial (mg)">
           <input inputMode="decimal" value={vialMg} onChange={(e) => setVialMg(e.target.value)} />
         </Field>
-        <Field label="Bacteriostatic water (mL)">
+        <Field label="Water (mL)">
           <input inputMode="decimal" value={waterMl} onChange={(e) => setWaterMl(e.target.value)} />
         </Field>
         <Field label="Dose (mcg)">
@@ -53,35 +68,32 @@ export function ReconCalculator({
       </div>
 
       <div
-        className={`mt-3 rounded-xl border px-4 py-3.5 ${tooBig ? "border-alert bg-alert-soft" : "border-line bg-paper"}`}
+        className={`mt-3 rounded-[20px] px-4 py-4 ${tooBig ? "bg-alert-soft" : "bg-paper"}`}
         aria-live="polite"
       >
         {result ? (
           <>
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-[11.5px] text-muted">Draw to</p>
-                <p className="num text-[34px] leading-none font-medium">{formatUnits(result.units)}</p>
-                <p className="text-[12px] text-muted">units ({syringe.unitsPerMl === 100 ? "U-100" : "U-40"} syringe)</p>
-              </div>
-              <div className="text-right">
-                <p className="num text-[15px]">{result.doseMl.toFixed(3)} mL</p>
-                <p className="num text-[12px] text-muted">{(result.concentrationMcgPerMl / 1000).toFixed(2)} mg/mL</p>
-              </div>
+            <p className="text-[12px] font-medium text-muted">Draw to</p>
+            <p className="num mt-0.5 text-[42px] leading-none font-semibold">
+              {formatUnits(result.units)}
+              <span className="ml-2 text-[15px] font-medium text-muted">units</span>
+            </p>
+            <p className="mt-1.5 text-[12.5px] text-muted">{syringe.label}</p>
+
+            <div className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-3">
+              <Stat label="Doses" value={Math.floor(result.dosesPerVial)} sub="per vial" />
+              <Stat label="Per mL" value={Math.round(result.concentrationMcgPerMl).toLocaleString()} sub="mcg" />
+              <Stat label="Volume" value={result.doseMl.toFixed(3)} sub="mL" />
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">
-              <Stat label="Doses per vial" value={Math.floor(result.dosesPerVial)} />
-              <Stat label="Concentration" value={`${Math.round(result.concentrationMcgPerMl)}`} sub="mcg/mL" />
-              <Stat label="Vial volume" value={`${Number(waterMl).toFixed(1)}`} sub="mL" />
-            </div>
+
             {tooBig ? (
-              <p className="mt-2 text-[12px] text-alert">
-                That dose needs more than this syringe holds. Add water, or use a bigger barrel.
+              <p className="mt-3 text-[12.5px] text-alert">
+                More than this barrel holds — add water or pick a bigger syringe.
               </p>
             ) : null}
           </>
         ) : (
-          <p className="text-[13px] text-muted">Enter a vial size, water volume and dose.</p>
+          <p className="text-[13px] text-muted">Enter a vial size, water and dose.</p>
         )}
       </div>
 
@@ -103,22 +115,14 @@ export function ReconCalculator({
               setSaved(true);
             }}
           >
-            {saved ? "Saved to this protocol" : "Save this vial to the protocol"}
+            {saved ? "Saved" : "Save this vial"}
           </Btn>
-          <p className="mt-2 text-[11.5px] text-muted">
-            Every dose you log after this counts down the vial: {result ? Math.floor(result.dosesPerVial) : 0} doses in it.
-          </p>
         </div>
       ) : (
-        <p className="mt-3 text-[11.5px] text-muted">
-          Math is mg ÷ mL → mcg/mL, then dose ÷ concentration → syringe units.
-          {compounds.length > 0 ? " Save a vial from a protocol to make it count down automatically." : ""}
+        <p className="mt-2 px-1 text-[12px] text-muted">
+          {result ? `${Math.floor(result.dosesPerVial)} doses in this vial.` : ""}
         </p>
       )}
-      <div className="mt-2 flex gap-2">
-        <Pill tone="neutral">Reconstitute with the vial upright</Pill>
-        <Pill tone="neutral">Never shake — swirl</Pill>
-      </div>
     </div>
   );
 }
