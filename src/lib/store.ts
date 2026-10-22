@@ -208,7 +208,6 @@ function demoState(): State {
   }
   for (let i = 11; i >= 1; i--) {
     doses.push({ id: `b${i}`, compoundId: "demo-bpc", dose: 250, unit: "mcg", at: iso(day(i, 7)), units: 10, site: sites[i % 4] });
-    doses.push({ id: `b${i}b`, compoundId: "demo-bpc", dose: 250, unit: "mcg", at: iso(day(i, 20)), units: 10, site: sites[(i + 2) % 4] });
   }
   for (let i = 19; i >= 1; i--) {
     const d = day(i, 21);
