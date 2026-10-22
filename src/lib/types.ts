@@ -32,6 +32,8 @@ export type Compound = {
   cycle?: { onDays: number; offDays: number };
   startDate: string; // yyyy-mm-dd
   vialId?: string;
+  /** hidden from Today and the list, history kept */
+  archived?: boolean;
   /** scheduled dose changes, e.g. GLP-1 steps every 4 weeks */
   titration?: { at: string; dose: number }[];
   /** GLP-1 pens: concentration printed on the pen */

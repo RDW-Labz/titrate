@@ -368,17 +368,34 @@ export default function ProtocolDetailPage() {
           </ul>
         </div>
 
-        <button
-          className="press mt-3 w-full py-2 text-[12.5px] text-muted underline underline-offset-2"
-          onClick={() => {
-            if (confirm(`Stop tracking ${compound.name}?`)) {
-              actions.removeCompound(compound.id);
+        <div className="mt-4 flex gap-2">
+          <Btn
+            variant="line"
+            className="flex-1 !text-[13px]"
+            onClick={() => {
+              actions.archiveCompound(compound.id, true);
+              toast(`${compound.name} archived — history kept`, {
+                label: "Undo",
+                run: () => actions.archiveCompound(compound.id, false),
+              });
               router.push("/protocols");
-            }
-          }}
-        >
-          Stop tracking
-        </button>
+            }}
+          >
+            Archive
+          </Btn>
+          <Btn
+            variant="line"
+            className="!text-[13px] !text-alert"
+            onClick={() => {
+              if (confirm(`Delete ${compound.name} and its dose history for good?`)) {
+                actions.removeCompound(compound.id);
+                router.push("/protocols");
+              }
+            }}
+          >
+            Delete
+          </Btn>
+        </div>
       </Disclosure>
     </div>
   );

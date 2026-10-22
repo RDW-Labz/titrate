@@ -95,6 +95,12 @@ export const actions = {
     update((s) => ({ ...s, compounds: [...s.compounds, compound] }));
     return compound;
   },
+  archiveCompound(id: string, archived: boolean) {
+    update((s) => ({
+      ...s,
+      compounds: s.compounds.map((c) => (c.id === id ? { ...c, archived } : c)),
+    }));
+  },
   updateCompound(id: string, patch: Partial<Compound>) {
     update((s) => ({
       ...s,

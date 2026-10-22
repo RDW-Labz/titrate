@@ -27,7 +27,7 @@ export default function TodayPage() {
     return () => clearTimeout(t);
   }, [flash]);
 
-  if (compounds.length === 0) {
+  if (compounds.every((c) => c.archived)) {
     return (
       <div className="pt-3">
         <h1 className="px-1 text-[28px] font-semibold tracking-[-0.025em]">Today</h1>
@@ -61,7 +61,8 @@ export default function TodayPage() {
     );
   }
 
-  const rows = compounds.map((c) => ({ c, due: isDueOn(c, doses, now), next: nextDoseMoment(c, doses, now) }));
+  const active = compounds.filter((c) => !c.archived);
+  const rows = active.map((c) => ({ c, due: isDueOn(c, doses, now), next: nextDoseMoment(c, doses, now) }));
   const dueRows = rows.filter((r) => r.due);
   const hero =
     rows.find((r) => r.c.id === flash) ??
@@ -97,7 +98,7 @@ export default function TodayPage() {
       today: k === dayKey(now),
       logged: doses.filter((x) => !x.skipped && dayKey(new Date(x.at)) === k).length,
       skipped: doses.some((x) => x.skipped && dayKey(new Date(x.at)) === k),
-      due: compounds.some((c) => isDueOn(c, doses, d)),
+      due: active.some((c) => isDueOn(c, doses, d)),
     };
   });
 
