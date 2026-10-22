@@ -52,6 +52,25 @@ export function unitsForDose(
   return r ? r.units : null;
 }
 
+/**
+ * Water volume that keeps this dose inside the chosen barrel.
+ * More water = more units to draw, so a too-big draw needs *less* water.
+ */
+export function waterToFit({
+  vialMg,
+  doseMcg,
+  unitsPerMl,
+  maxUnits,
+}: {
+  vialMg: number;
+  doseMcg: number;
+  unitsPerMl: number;
+  maxUnits: number;
+}): number | null {
+  if (!(vialMg > 0) || !(doseMcg > 0) || !(unitsPerMl > 0) || !(maxUnits > 0)) return null;
+  return (maxUnits * vialMg * 1000) / (doseMcg * unitsPerMl);
+}
+
 export function formatUnits(u: number): string {
   // insulin syringes are marked every half unit below 10, whole units above
   const rounded = u < 10 ? Math.round(u * 2) / 2 : Math.round(u);

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { reconstitute, unitsForDose, formatUnits } from "../src/lib/recon.ts";
+import { reconstitute, unitsForDose, formatUnits, waterToFit } from "../src/lib/recon.ts";
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
 import { levelSeries, levelWord, levelNow } from "../src/lib/levels.ts";
 import { dosesIcs } from "../src/lib/ics.ts";
@@ -195,4 +195,18 @@ test("calendar export writes one event per scheduled dose and nothing while off-
   assert.ok(!ics.includes("c-arch"), "archived compounds are skipped");
   assert.ok(ics.startsWith("BEGIN:VCALENDAR") && ics.trimEnd().endsWith("END:VCALENDAR"));
   assert.ok(ics.includes("\r\n"), "CRLF line endings, as the spec requires");
+});
+
+test("waterToFit catches the too-big draw and the direction of the fix", () => {
+  // 5 mg in 2 mL = 2500 mcg/mL: 5000 mcg needs 200 units, four times a 50-unit barrel
+  const tooMuch = reconstitute({ vialMg: 5, waterMl: 2, doseMcg: 5000, unitsPerMl: 100 })!;
+  assert.equal(Math.round(tooMuch.units), 200);
+  const water = waterToFit({ vialMg: 5, doseMcg: 5000, unitsPerMl: 100, maxUnits: 50 })!;
+  assert.equal(Math.round(water * 100) / 100, 0.5, "0.5 mL puts the same dose at 50 units");
+  // the suggestion actually works
+  const refit = reconstitute({ vialMg: 5, waterMl: water, doseMcg: 5000, unitsPerMl: 100 })!;
+  assert.equal(Math.round(refit.units), 50);
+  // less water than the original, not more
+  assert.ok(water < 2);
+  assert.equal(waterToFit({ vialMg: 0, doseMcg: 5000, unitsPerMl: 100, maxUnits: 50 }), null);
 });

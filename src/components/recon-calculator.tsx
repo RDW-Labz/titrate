@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Btn, Field, Stat } from "./ui";
-import { SYRINGES, formatUnits, reconstitute } from "@/lib/recon";
+import { SYRINGES, formatUnits, reconstitute, waterToFit } from "@/lib/recon";
 import { actions } from "@/lib/store";
 import type { Compound, Vial } from "@/lib/types";
 
@@ -79,6 +79,15 @@ export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; init
     unitsPerMl: syringe.unitsPerMl,
   });
   const over = result ? result.units > syringe.maxUnits : false;
+  const fit = over
+    ? waterToFit({
+        vialMg: Number(vialMg),
+        doseMcg: Number(dose),
+        unitsPerMl: syringe.unitsPerMl,
+        maxUnits: syringe.maxUnits,
+      })
+    : null;
+  const usable = fit !== null && fit >= 0.05 ? Math.round(fit * 10) / 10 : null;
 
   return (
     <div>
@@ -121,8 +130,10 @@ export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; init
             </div>
 
             {over ? (
-              <p className="mt-3 text-[12.5px] text-alert">
-                More than this barrel holds — add water or pick a bigger syringe.
+              <p className="mt-3 text-[12.5px] leading-relaxed text-alert">
+                {usable
+                  ? `More than this barrel holds. Mix with ${usable} mL of water instead — less water means fewer units per dose.`
+                  : "More than this barrel holds. Use a bigger syringe, or split the dose."}
               </p>
             ) : null}
           </>
