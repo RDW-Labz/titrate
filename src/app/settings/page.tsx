@@ -16,12 +16,18 @@ export default function SettingsPage() {
   const [perm, setPerm] = useState("default");
   const [on, setOn] = useState(false);
   const [kb, setKb] = useState("0");
+  const [installed, setInstalled] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setPerm(typeof Notification === "undefined" ? "unsupported" : Notification.permission);
     setOn(localStorage.getItem(REMINDERS_KEY) === "1");
     setKb(((localStorage.getItem(KEY) ?? "").length / 1024).toFixed(1));
+    // shortcut: iOS uses navigator.standalone, everyone else display-mode
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setInstalled(standalone);
   }, [state]);
 
   function restore(raw: string | null, label: string) {
@@ -171,6 +177,17 @@ export default function SettingsPage() {
           </Link>
         </div>
       </section>
+
+      {!installed ? (
+        <section className="mt-3 rounded-[24px] bg-accent-soft px-4 py-4">
+          <p className="text-[15px] font-semibold text-accent">Add it to your home screen</p>
+          <p className="mt-1 text-[12.5px] leading-relaxed text-accent/85">
+            {/iPhone|iPad|iPod/.test(navigator.userAgent)
+              ? "Tap Share, then Add to Home Screen — it opens full screen and works offline."
+              : "Open the browser menu and choose Install app — it opens full screen and works offline."}
+          </p>
+        </section>
+      ) : null}
 
       <section className="mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
         <p className="text-[15px] font-semibold">Start over</p>
