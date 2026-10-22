@@ -5,6 +5,7 @@ import { Burst, Btn } from "./ui";
 import { toast } from "./toast";
 import { actions, useStore } from "@/lib/store";
 import { toMcg, unitsForDose } from "@/lib/recon";
+import { doseOn } from "@/lib/titration";
 import type { Compound } from "@/lib/types";
 
 function useLog(compound: Compound, onLogged?: () => void) {
@@ -13,13 +14,9 @@ function useLog(compound: Compound, onLogged?: () => void) {
   const vial = vials.find((v) => v.id === compound.vialId);
 
   const log = () => {
-    const units = vial ? unitsForDose(vial, toMcg(compound.dose, compound.unit)) : null;
-    const entry = actions.logDose({
-      compoundId: compound.id,
-      dose: compound.dose,
-      unit: compound.unit,
-      units: units ?? undefined,
-    });
+    const dose = doseOn(compound);
+    const units = vial ? unitsForDose(vial, toMcg(dose, compound.unit)) : null;
+    const entry = actions.logDose({ compoundId: compound.id, dose, unit: compound.unit, units: units ?? undefined });
     setDone(true);
     onLogged?.();
     toast(`Logged ${compound.name}`, { label: "Undo", run: () => actions.deleteDose(entry.id) });
@@ -57,7 +54,7 @@ export function LogDot({ compound, onLogged }: { compound: Compound; onLogged?: 
   return (
     <button
       onClick={log}
-      aria-label={`Log ${compound.name} ${compound.dose} ${compound.unit}`}
+      aria-label={`Log ${compound.name} ${doseOn(compound)} ${compound.unit}`}
       className={`press relative grid size-11 shrink-0 place-items-center rounded-full border text-[15px] font-semibold ${
         done ? "border-accent bg-accent text-white" : "border-line bg-card text-muted"
       }`}
@@ -79,9 +76,10 @@ export function LogAllButton({ compounds }: { compounds: Compound[] }) {
       className="relative w-full"
       onClick={() => {
         const ids = compounds.map((c) => {
+          const dose = doseOn(c);
           const vial = vials.find((v) => v.id === c.vialId);
-          const units = vial ? unitsForDose(vial, toMcg(c.dose, c.unit)) : null;
-          return actions.logDose({ compoundId: c.id, dose: c.dose, unit: c.unit, units: units ?? undefined }).id;
+          const units = vial ? unitsForDose(vial, toMcg(dose, c.unit)) : null;
+          return actions.logDose({ compoundId: c.id, dose, unit: c.unit, units: units ?? undefined }).id;
         });
         setDone(true);
         toast(`Logged ${compounds.length} doses`, { label: "Undo", run: () => ids.forEach(actions.deleteDose) });

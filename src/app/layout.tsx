@@ -19,9 +19,12 @@ export const metadata: Metadata = {
   title: "Titrate — peptide protocol tracker",
   description:
     "Dose and cycle tracking, reconstitution math, estimated level curves and GLP-1 nutrition in one place.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Titrate" },
+  icons: { icon: "/icon-192.png", apple: "/icon-180.png" },
 };
 
-export const viewport: Viewport = { themeColor: "#e7ebee" };
+export const viewport: Viewport = { themeColor: "#edf1f5" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

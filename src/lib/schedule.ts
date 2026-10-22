@@ -96,6 +96,14 @@ export function timeTo(at: Date, now: Date): string {
   return `${Math.floor(hours / 24)}d ${hours % 24}h`;
 }
 
+/** the dose in force on a date, given an ordered list of titration steps */
+export function doseOnAt(baseDose: number, steps: { at: string; dose: number }[] | undefined, date: Date): number {
+  const today = startOfDay(date).getTime();
+  const active = (steps ?? []).filter((s) => parseDay(s.at).getTime() <= today);
+  if (!active.length) return baseDose;
+  return active.reduce((best, s) => (s.at > best.at ? s : best), active[0]).dose;
+}
+
 export function lastDose(doses: DoseLog[], compoundId: string): DoseLog | undefined {
   return doses
     .filter((d) => d.compoundId === compoundId && !d.skipped)

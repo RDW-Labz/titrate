@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { reconstitute, unitsForDose, formatUnits } from "../src/lib/recon.ts";
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
-import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey } from "../src/lib/schedule.ts";
+import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
 const hours = (h: number) => h * 3_600_000;
@@ -117,4 +117,25 @@ test("streak counts consecutive logged days without breaking on a fresh morning"
 test("site suggestion picks the least recently used site", () => {
   const doses: DoseLog[] = [{ ...log(new Date()), site: "Right glute" }];
   assert.equal(suggestSite(doses), "Left abdomen");
+});
+
+test("titration: the dose in force follows the latest step on or before the day", () => {
+  const steps = [
+    { at: "2026-01-05", dose: 7.5 },
+    { at: "2026-01-01", dose: 5 },
+    { at: "2026-01-19", dose: 10 },
+  ];
+  assert.equal(doseOnAt(2.5, steps, new Date(2025, 11, 30)), 2.5, "before any step");
+  assert.equal(doseOnAt(2.5, steps, new Date(2026, 0, 1)), 5);
+  assert.equal(doseOnAt(2.5, steps, new Date(2026, 0, 10)), 7.5);
+  assert.equal(doseOnAt(2.5, steps, new Date(2026, 0, 19)), 10);
+  assert.equal(doseOnAt(2.5, undefined, new Date(2026, 0, 19)), 2.5);
+});
+
+test("vial use-by is 28 days after mixing", () => {
+  const mixed = new Date(2026, 0, 1);
+  const useBy = addDays(mixed, 28);
+  assert.equal(dayKey(useBy), "2026-01-29");
+  assert.equal(daysBetween(new Date(2026, 0, 20), useBy), 9);
+  assert.equal(daysBetween(new Date(2026, 1, 5), useBy), -7);
 });

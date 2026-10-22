@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { GearIcon } from "@/components/icons";
 import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
 import { Btn, CountdownRing, Empty } from "@/components/ui";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
 import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
+import { doseOn } from "@/lib/titration";
 
 export default function TodayPage() {
   const { compounds, doses, foods, goals } = useStore();
@@ -60,11 +62,16 @@ export default function TodayPage() {
 
   return (
     <div className="pt-3">
-      <div className="enter flex items-baseline justify-between px-1">
-        <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.025em]">Today</h1>
-        <span className="text-[13px] text-muted">
-          {now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
-        </span>
+      <div className="enter flex items-center justify-between px-1">
+        <div className="flex items-baseline gap-2">
+          <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.025em]">Today</h1>
+          <span className="text-[13px] text-muted">
+            {now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+          </span>
+        </div>
+        <Link href="/settings" aria-label="Settings" className="press -mr-1 p-1.5 text-muted">
+          <GearIcon className="size-[21px]" />
+        </Link>
       </div>
 
       {hero ? (
@@ -94,7 +101,7 @@ export default function TodayPage() {
               {hero.c.name}
             </h2>
             <p className="num mt-1 text-[14px] text-white/60">
-              {hero.c.dose} {hero.c.unit} · {peptide?.frequency ?? "custom"}
+              {doseOn(hero.c, now)} {hero.c.unit} · {peptide?.frequency ?? "custom"}
             </p>
 
             <div className="mt-5 w-full">
@@ -122,7 +129,7 @@ export default function TodayPage() {
               <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
                 <p className="truncate text-[16px] font-medium">{c.name}</p>
                 <p className="num text-[12.5px] text-muted">
-                  {c.dose} {c.unit} · {due ? "due today" : next ? humanIn(next.at, now) : "off cycle"}
+                  {doseOn(c, now)} {c.unit} · {due ? "due today" : next ? humanIn(next.at, now) : "off cycle"}
                 </p>
               </Link>
               {due ? <LogDot compound={c} /> : <span className="pr-1 text-[18px] text-muted">›</span>}

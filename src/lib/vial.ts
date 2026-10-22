@@ -1,5 +1,19 @@
 import { unitsForDose, toMcg } from "./recon";
 import type { Compound, DoseLog, Vial } from "./types";
+import { addDays, daysBetween, parseDay } from "./schedule";
+import { doseOn } from "./titration";
+
+/** bacteriostatic water keeps a mixed vial usable for about 28 days */
+export const BUD_DAYS = 28;
+
+export function useByDate(vial: Vial): Date {
+  return addDays(parseDay(vial.mixedOn), BUD_DAYS);
+}
+
+/** days until the vial is past its beyond-use date; negative means expired */
+export function budDaysLeft(vial: Vial, now = new Date()): number {
+  return daysBetween(now, useByDate(vial));
+}
 
 export type VialStatus = {
   totalMcg: number;
@@ -11,13 +25,13 @@ export type VialStatus = {
 };
 
 /** supply counts down from the doses logged after the vial was mixed */
-export function vialStatus(vial: Vial, compound: Compound, doses: DoseLog[]): VialStatus {
+export function vialStatus(vial: Vial, compound: Compound, doses: DoseLog[], now = new Date()): VialStatus {
   const totalMcg = vial.totalMg * 1000;
   const mixedAt = new Date(`${vial.mixedOn}T00:00:00`).getTime();
   const usedMcg = doses
     .filter((d) => d.compoundId === compound.id && !d.skipped && +new Date(d.at) >= mixedAt)
     .reduce((n, d) => n + toMcg(d.dose, d.unit), 0);
-  const doseMcg = toMcg(compound.dose, compound.unit);
+  const doseMcg = toMcg(doseOn(compound, now), compound.unit);
   return {
     totalMcg,
     usedMcg,

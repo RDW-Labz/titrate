@@ -32,6 +32,8 @@ export type Compound = {
   cycle?: { onDays: number; offDays: number };
   startDate: string; // yyyy-mm-dd
   vialId?: string;
+  /** scheduled dose changes, e.g. GLP-1 steps every 4 weeks */
+  titration?: { at: string; dose: number }[];
   /** GLP-1 pens: concentration printed on the pen */
   pen?: { mgPerMl: number; unitsPerMl: number };
   notes?: string;

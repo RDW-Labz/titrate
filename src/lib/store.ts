@@ -5,6 +5,7 @@ import type { Compound, DoseLog, Food, FoodLog, Goals, State, Vial, WeightLog } 
 import { dayKey, parseDay, suggestSite } from "./schedule";
 
 const KEY = "titrate.v1";
+const BACKUP = "titrate.v1.backup";
 
 const DEFAULT_GOALS: Goals = { kcal: 2000, p: 150, c: 180, f: 65, fiber: 30 };
 
@@ -49,6 +50,9 @@ function emit() {
 function commit(next: State) {
   state = next;
   try {
+    // keep one previous snapshot so a bad edit or a cleared tab is recoverable
+    const prev = localStorage.getItem(KEY);
+    if (prev) localStorage.setItem(BACKUP, prev);
     localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
     // storage full or blocked — keep the in-memory state usable
@@ -127,6 +131,20 @@ export const actions = {
   },
   deleteDose(id: string) {
     update((s) => ({ ...s, doses: s.doses.filter((d) => d.id !== id) }));
+  },
+  updateDose(id: string, patch: Partial<DoseLog>) {
+    update((s) => ({ ...s, doses: s.doses.map((d) => (d.id === id ? { ...d, ...patch } : d)) }));
+  },
+  setTitration(compoundId: string, steps: { at: string; dose: number }[]) {
+    update((s) => ({
+      ...s,
+      compounds: s.compounds.map((c) =>
+        c.id === compoundId ? { ...c, titration: [...steps].sort((a, b) => a.at.localeCompare(b.at)) } : c,
+      ),
+    }));
+  },
+  replace(next: State) {
+    commit(next);
   },
   addFood(f: Omit<FoodLog, "id" | "at"> & { at?: Date }) {
     const entry: FoodLog = { ...f, id: uid(), at: (f.at ?? new Date()).toISOString() };

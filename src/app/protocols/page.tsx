@@ -5,6 +5,7 @@ import { LogDot } from "@/components/log-dose";
 import { Empty } from "@/components/ui";
 import { cycleInfo, humanIn, isDueOn, nextDue } from "@/lib/schedule";
 import { useStore } from "@/lib/store";
+import { doseOn } from "@/lib/titration";
 
 export default function PeptidesPage() {
   const { compounds, doses } = useStore();
@@ -45,7 +46,7 @@ export default function PeptidesPage() {
                 <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
                   <p className="truncate text-[17px] font-medium">{c.name}</p>
                   <p className="num text-[13px] text-muted">
-                    {c.dose} {c.unit}
+                    {doseOn(c, now)} {c.unit}
                     {cycle?.phase === "off"
                       ? " · off cycle"
                       : due

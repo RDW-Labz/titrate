@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { BookIcon, CalcIcon, ForkIcon, HomeIcon, VialIcon } from "./icons";
 import { ToastHost } from "./toast";
+import { Reminders } from "./reminders";
 import { useReady } from "@/lib/store";
 
 const TABS = [
@@ -72,6 +73,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </Suspense>
       </nav>
       <ToastHost />
+      <Reminders />
     </div>
   );
 }
