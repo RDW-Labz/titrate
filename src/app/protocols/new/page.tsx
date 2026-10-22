@@ -2,12 +2,15 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Btn, Card, Field, PageTitle, Pill, SectionHead } from "@/components/ui";
+import { Btn, Field, PageTitle, Pill } from "@/components/ui";
+import { toast } from "@/components/toast";
 import { CATEGORY_LABEL, PEPTIDE_BY_ID, PEPTIDES, halfLifeLabel } from "@/lib/peptides";
 import { actions } from "@/lib/store";
-import type { Schedule, Peptide } from "@/lib/types";
+import type { Peptide, Schedule } from "@/lib/types";
 
-const SCHEDULES: { id: string; label: string; schedule: Schedule }[] = [
+type Preset = { id: string; label: string; schedule: Schedule };
+
+const SCHEDULES: Preset[] = [
   { id: "daily", label: "Daily", schedule: { kind: "every", everyDays: 1 } },
   { id: "eod", label: "Every other day", schedule: { kind: "every", everyDays: 2 } },
   { id: "twice", label: "Mon + Thu", schedule: { kind: "weekly", days: [1, 4] } },
@@ -20,10 +23,19 @@ const SCHEDULES: { id: string; label: string; schedule: Schedule }[] = [
 const CYCLES = [
   { id: "none", label: "Continuous", cycle: undefined },
   { id: "4-2", label: "4 wk on / 2 off", cycle: { onDays: 28, offDays: 14 } },
-  { id: "6-2", label: "6 wk on / 2 off", cycle: { onDays: 42, offDays: 14 } },
   { id: "8-4", label: "8 wk on / 4 off", cycle: { onDays: 56, offDays: 28 } },
   { id: "12-4", label: "12 wk on / 4 off", cycle: { onDays: 84, offDays: 28 } },
 ];
+
+/** guess the schedule and cycle from the library entry so nobody fills a form */
+function presetFor(p: Peptide) {
+  const f = p.frequency.toLowerCase();
+  const scheduleId = f.includes("weekly")
+    ? f.includes("2×") ? "twice" : f.includes("3×") ? "three" : f.includes("1–2×") ? "weekly" : "weekly"
+    : "daily";
+  const cycleId = p.cycle && /\d+\s*(wk|week)/i.test(p.cycle) ? "8-4" : "none";
+  return { dose: String(p.range[0]), scheduleId, cycleId, vialMg: "5", waterMl: "2" };
+}
 
 export default function NewProtocolPage() {
   return (
@@ -46,52 +58,53 @@ function NewProtocol() {
   const [scheduleId, setScheduleId] = useState("daily");
   const [cycleId, setCycleId] = useState("none");
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [mixVial, setMixVial] = useState(true);
   const [vialMg, setVialMg] = useState("5");
   const [waterMl, setWaterMl] = useState("2");
 
   function choose(p: Peptide) {
+    const preset = presetFor(p);
     setPeptide(p);
-    setDose(String(p.range[0]));
-    setScheduleId(p.frequency.toLowerCase().includes("weekly") && !p.frequency.includes("3") ? "weekly" : p.frequency.includes("daily") ? "daily" : "daily");
-    setCycleId(p.cycle && /week/i.test(p.cycle) && p.cycle.includes("/") ? "8-4" : "none");
-    setMixVial(p.route !== "pen");
-    setVialMg(p.range[0] >= 1000 ? "10" : "5");
+    setDose(preset.dose);
+    setScheduleId(preset.scheduleId);
+    setCycleId(preset.cycleId);
+    setVialMg(preset.vialMg);
+    setWaterMl(preset.waterMl);
   }
 
   if (!peptide) {
     const q = search.trim().toLowerCase();
     return (
       <div>
-        <PageTitle meta="Pick the compound. Doses and schedules are editable later.">New protocol</PageTitle>
-        <div className="field">
-          <input
-            placeholder="Search peptides"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search peptides"
-          />
-        </div>
-        <SectionHead>{q ? "Matches" : "All compounds"}</SectionHead>
-        <Card className="divide-y divide-line">
+        <PageTitle meta="Pick one. Everything else is prefilled — you can change it after.">Add a peptide</PageTitle>
+        <input
+          className="plaininput"
+          placeholder="Search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search peptides"
+        />
+        <ul className="mt-3 divide-y divide-line rounded-[24px] bg-card shadow-card">
           {PEPTIDES.filter((p) => !q || p.name.toLowerCase().includes(q) || p.aka?.toLowerCase().includes(q)).map(
             (p) => (
-              <button
-                key={p.id}
-                onClick={() => choose(p)}
-                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-paper"
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-[14.5px] font-medium">{p.name}</span>
-                  <span className="num block text-[11.5px] text-muted">
-                    {CATEGORY_LABEL[p.category]} · {p.frequency} · t½ {halfLifeLabel(p.halfLifeH)}
+              <li key={p.id}>
+                <button
+                  onClick={() => choose(p)}
+                  className="press flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-[16px] font-medium">{p.name}</span>
+                    <span className="num block text-[12.5px] text-muted">
+                      {CATEGORY_LABEL[p.category]} · {p.frequency} · t½ {halfLifeLabel(p.halfLifeH)}
+                    </span>
                   </span>
-                </span>
-                <span className="text-muted">+</span>
-              </button>
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
+                    +
+                  </span>
+                </button>
+              </li>
             ),
           )}
-        </Card>
+        </ul>
       </div>
     );
   }
@@ -101,73 +114,36 @@ function NewProtocol() {
 
   return (
     <div>
-      <button onClick={() => setPeptide(null)} className="mb-2 text-[12.5px] text-accent">
-        ← Change compound
+      <button onClick={() => setPeptide(null)} className="press mb-1 text-[13px] font-medium text-accent">
+        ‹ Choose another
       </button>
       <PageTitle meta={peptide.blurb}>{peptide.name}</PageTitle>
 
-      <Card className="space-y-3 p-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={`Dose per shot (${peptide.unit})`} hint={`Common: ${peptide.range[0]}–${peptide.range[1]} ${peptide.unit}`}>
-            <input inputMode="decimal" value={dose} onChange={(e) => setDose(e.target.value)} />
-          </Field>
-          <Field label="Start date">
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          </Field>
+      <section className="enter rounded-[24px] bg-card px-4 py-4 shadow-card">
+        <div className="flex flex-wrap items-center gap-2">
+          <Pill tone="accent">
+            {dose} {peptide.unit}
+          </Pill>
+          <Pill tone="neutral">{SCHEDULES.find((s) => s.id === scheduleId)!.label}</Pill>
+          {cycle ? (
+            <Pill tone="warn">
+              {cycle.onDays / 7}w on / {cycle.offDays / 7}w off
+            </Pill>
+          ) : null}
+          {peptide.route !== "pen" ? (
+            <Pill tone="neutral">
+              {vialMg} mg + {waterMl} mL
+            </Pill>
+          ) : null}
         </div>
-
-        <Field label="Schedule">
-          <select value={scheduleId} onChange={(e) => setScheduleId(e.target.value)}>
-            {SCHEDULES.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </Field>
-
-        <Field label="Cycle" hint={peptide.cycle ? `Typical: ${peptide.cycle}` : undefined}>
-          <select value={cycleId} onChange={(e) => setCycleId(e.target.value)}>
-            {CYCLES.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </Field>
-
-        {peptide.route !== "pen" ? (
-          <div className="rounded-lg border border-line bg-paper p-3">
-            <label className="flex items-center justify-between gap-3">
-              <span className="text-[13px] font-medium">I mix this vial myself</span>
-              <input
-                type="checkbox"
-                checked={mixVial}
-                onChange={(e) => setMixVial(e.target.checked)}
-                className="size-4 accent-[var(--color-accent)]"
-              />
-            </label>
-            {mixVial ? (
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <Field label="Vial (mg)">
-                  <input inputMode="decimal" value={vialMg} onChange={(e) => setVialMg(e.target.value)} />
-                </Field>
-                <Field label="Water (mL)">
-                  <input inputMode="decimal" value={waterMl} onChange={(e) => setWaterMl(e.target.value)} />
-                </Field>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-      </Card>
-
-      <div className="mt-3 flex items-center gap-2">
-        <Pill tone="neutral">{schedule.kind === "every" ? `every ${schedule.everyDays}d` : `${schedule.days.length}×/week`}</Pill>
-        <Pill tone={cycle ? "warn" : "neutral"}>{cycle ? `${cycle.onDays / 7}w on / ${cycle.offDays / 7}w off` : "continuous"}</Pill>
-      </div>
+        <p className="mt-3 text-[13px] text-muted">
+          Prefilled from the usual protocol. Start now and change anything later.
+        </p>
+      </section>
 
       <Btn
-        className="mt-4 w-full"
+        size="lg"
+        className="mt-3 w-full"
         disabled={!(Number(dose) > 0)}
         onClick={() => {
           const compound = actions.addCompound({
@@ -179,7 +155,7 @@ function NewProtocol() {
             cycle,
             startDate,
           });
-          if (mixVial && peptide.route !== "pen") {
+          if (peptide.route !== "pen") {
             const vial = actions.addVial({
               peptideId: peptide.id,
               totalMg: Number(vialMg),
@@ -190,13 +166,57 @@ function NewProtocol() {
             });
             actions.updateCompound(compound.id, { vialId: vial.id });
           }
+          toast(`${peptide.name} added`);
           router.push(`/protocols/${compound.id}`);
         }}
       >
         Start tracking
       </Btn>
-      <p className="mt-2 px-1 text-[11.5px] text-muted">
-        Tracking only. This app does not prescribe doses — the ranges shown are the commonly researched ones.
+
+      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
+        <summary className="cursor-pointer text-[14px] font-semibold">Change the details</summary>
+        <div className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={`Dose (${peptide.unit})`}>
+              <input inputMode="decimal" value={dose} onChange={(e) => setDose(e.target.value)} />
+            </Field>
+            <Field label="Start date">
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </Field>
+          </div>
+          <Field label="Schedule">
+            <select value={scheduleId} onChange={(e) => setScheduleId(e.target.value)}>
+              {SCHEDULES.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Cycle" hint={peptide.cycle ? `Typical: ${peptide.cycle}` : undefined}>
+            <select value={cycleId} onChange={(e) => setCycleId(e.target.value)}>
+              {CYCLES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          {peptide.route !== "pen" ? (
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Vial (mg)">
+                <input inputMode="decimal" value={vialMg} onChange={(e) => setVialMg(e.target.value)} />
+              </Field>
+              <Field label="Water (mL)">
+                <input inputMode="decimal" value={waterMl} onChange={(e) => setWaterMl(e.target.value)} />
+              </Field>
+            </div>
+          ) : null}
+        </div>
+      </details>
+
+      <p className="mt-3 px-1 text-[12px] text-muted">
+        Tracking only — ranges come from published research, not a prescription.
       </p>
     </div>
   );

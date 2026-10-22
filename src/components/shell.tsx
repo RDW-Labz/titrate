@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { BookIcon, CalcIcon, ForkIcon, HomeIcon, VialIcon } from "./icons";
+import { ToastHost } from "./toast";
 import { useReady } from "@/lib/store";
 
 const TABS = [
@@ -70,6 +71,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <TabBar />
         </Suspense>
       </nav>
+      <ToastHost />
     </div>
   );
 }

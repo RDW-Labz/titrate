@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LogDoseButton, LogDot } from "@/components/log-dose";
+import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
 import { Btn, CountdownRing, Empty } from "@/components/ui";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
 import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
@@ -131,10 +131,16 @@ export default function TodayPage() {
         </ul>
       ) : null}
 
+      {rows.filter((r) => r.due).length > 1 ? (
+        <div className="enter mt-3" style={{ animationDelay: "170ms" }}>
+          <LogAllButton compounds={rows.filter((r) => r.due).map((r) => r.c)} />
+        </div>
+      ) : null}
+
       <Link
         href="/food"
         className="enter press mt-3 flex items-center gap-3 rounded-[22px] bg-card px-4 py-4 shadow-card"
-        style={{ animationDelay: "190ms" }}
+        style={{ animationDelay: "210ms" }}
       >
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-medium">

@@ -14,6 +14,8 @@ export default function FoodPage() {
   const [weight, setWeight] = useState("");
 
   const today = foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now));
+  const yesterdayKey = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+  const yesterday = foods.filter((f) => dayKey(new Date(f.at)) === yesterdayKey);
   const kcal = today.reduce((n, f) => n + f.kcal, 0);
   const protein = today.reduce((n, f) => n + f.p, 0);
   const fiber = today.reduce((n, f) => n + f.fiber, 0);
@@ -46,6 +48,23 @@ export default function FoodPage() {
           </button>
         ))}
       </div>
+
+      {yesterday.length > 0 && today.length === 0 ? (
+        <button
+          onClick={() =>
+            yesterday.forEach((f) =>
+              actions.addFood({ name: f.name, kcal: f.kcal, p: f.p, c: f.c, f: f.f, fiber: f.fiber }),
+            )
+          }
+          className="press mt-2 w-full rounded-[22px] bg-card px-4 py-3.5 text-left shadow-card"
+        >
+          <span className="text-[15px] font-medium">Same as yesterday</span>
+          <span className="num block text-[12.5px] text-muted">
+            copies {yesterday.length} {yesterday.length === 1 ? "entry" : "entries"} ·{" "}
+            {yesterday.reduce((n, f) => n + f.kcal, 0)} kcal
+          </span>
+        </button>
+      ) : null}
 
       <ul className="mt-3 divide-y divide-line rounded-[24px] bg-card shadow-card">
         {today.length === 0 ? (
