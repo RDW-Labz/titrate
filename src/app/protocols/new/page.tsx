@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Btn, Field, PageTitle, Pill } from "@/components/ui";
 import { toast } from "@/components/toast";
+import { Disclosure } from "@/components/disclosure";
 import { CATEGORY_LABEL, PEPTIDE_BY_ID, PEPTIDES, halfLifeLabel } from "@/lib/peptides";
 import { actions } from "@/lib/store";
 import type { Peptide } from "@/lib/types";
@@ -155,8 +156,7 @@ function NewProtocol() {
         Start tracking
       </Btn>
 
-      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
-        <summary className="cursor-pointer text-[14px] font-semibold">Change the details</summary>
+      <Disclosure className="mt-3" title="Change the details">
         <div className="mt-3 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <Field label={`Dose (${peptide.unit})`}>
@@ -195,7 +195,7 @@ function NewProtocol() {
             </div>
           ) : null}
         </div>
-      </details>
+      </Disclosure>
 
       <p className="mt-3 px-1 text-[12px] text-muted">
         Tracking only — ranges come from published research, not a prescription.

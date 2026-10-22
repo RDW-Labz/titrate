@@ -149,6 +149,7 @@ function RingSvg({
   stroke,
   track = "var(--color-line)",
   width = 8,
+  gradient = false,
   children,
 }: {
   pct: number;
@@ -156,6 +157,7 @@ function RingSvg({
   stroke: string;
   track?: string;
   width?: number;
+  gradient?: boolean;
   children?: ReactNode;
 }) {
   const [drawn, setDrawn] = useState(0);
@@ -168,13 +170,32 @@ function RingSvg({
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={width} opacity={0.35} />
+        {gradient ? (
+          <defs>
+            <linearGradient id={`rg-${size}`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#8fe6c6" />
+              <stop offset="55%" stopColor="#5ec8a8" />
+              <stop offset="100%" stopColor="#2fa98a" />
+            </linearGradient>
+          </defs>
+        ) : null}
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={width} opacity={0.28} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r + width * 0.95}
+          fill="none"
+          stroke={track}
+          strokeWidth="1.5"
+          strokeDasharray="1 6"
+          opacity={0.25}
+        />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={stroke}
+          stroke={gradient ? `url(#rg-${size})` : stroke}
           strokeWidth={width}
           strokeLinecap="round"
           strokeDasharray={`${c * drawn} ${c}`}
@@ -201,7 +222,7 @@ export function CountdownRing({
   size?: number;
 }) {
   return (
-    <RingSvg pct={progress} size={size} stroke="#5ec8a8" track="#ffffff" width={10}>
+    <RingSvg pct={progress} size={size} stroke="#5ec8a8" track="#ffffff" width={10} gradient>
       <span className="text-[11.5px] font-medium text-white/55">{top}</span>
       <span className="num mt-1 text-[26px] leading-none font-semibold text-white">{big}</span>
       <span className="mt-1 text-[11.5px] text-white/55">{bottom}</span>

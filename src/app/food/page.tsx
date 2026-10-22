@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Btn, Field, PageTitle, Ring } from "@/components/ui";
+import { Disclosure } from "@/components/disclosure";
 import { addDays, dayKey } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 
@@ -150,8 +151,7 @@ export default function FoodPage() {
         )}
       </ul>
 
-      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
-        <summary className="cursor-pointer text-[15px] font-semibold">More</summary>
+      <Disclosure className="mt-3" title="More">
 
         <div className="mt-4">
           <p className="text-[13.5px] font-semibold">Add food</p>
@@ -250,7 +250,7 @@ export default function FoodPage() {
         </div>
 
         <p className="num mt-3 text-[12px] text-muted">Fiber {fiber} g on this day</p>
-      </details>
+      </Disclosure>
     </div>
   );
 }

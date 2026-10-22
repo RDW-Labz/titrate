@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { BookIcon, CalcIcon, ForkIcon, HomeIcon, VialIcon } from "./icons";
 import { ToastHost } from "./toast";
+import { PageFade } from "./page-fade";
 import { Reminders } from "./reminders";
 import { useReady } from "@/lib/store";
 
@@ -41,7 +42,7 @@ function TabBar() {
                 href={t.href}
                 aria-current={active ? "page" : undefined}
                 className={`press relative flex flex-col items-center gap-1 py-2.5 text-[10.5px] font-semibold ${
-                  active ? "text-accent" : "text-muted"
+                  active ? "tab-active text-accent" : "text-muted"
                 }`}
               >
                 <t.Icon className={active ? "size-[21px]" : "size-[21px] opacity-80"} />
@@ -63,7 +64,9 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="mx-auto flex min-h-dvh w-full max-w-[460px] flex-col">
       <main className="flex-1 px-4 pb-32">
         {ready ? (
-          children
+          <Suspense fallback={children}>
+            <PageFade>{children}</PageFade>
+          </Suspense>
         ) : (
           // matches the real layout closely enough that the swap barely moves
           <div className="pt-3" aria-hidden="true">

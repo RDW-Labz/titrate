@@ -6,6 +6,7 @@ import { useState } from "react";
 import { LevelChart } from "@/components/level-chart";
 import { LogDoseButton } from "@/components/log-dose";
 import { ReconCalculator } from "@/components/recon-calculator";
+import { Disclosure } from "@/components/disclosure";
 import { toast } from "@/components/toast";
 import { Btn, Field, PageTitle } from "@/components/ui";
 import { levelNow, levelWindow, levelWord } from "@/lib/levels";
@@ -96,11 +97,17 @@ export default function ProtocolDetailPage() {
         ) : null}
       </section>
 
-      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
-        <summary className="cursor-pointer text-[15px] font-semibold">
-          More
-          {step ? <span className="num ml-2 text-[12.5px] text-muted">next {step.dose} {compound.unit}</span> : null}
-        </summary>
+      <Disclosure
+        className="mt-3"
+        title="More"
+        right={
+          step ? (
+            <span className="num text-[12.5px] text-muted">
+              next {step.dose} {compound.unit}
+            </span>
+          ) : undefined
+        }
+      >
 
         <div className="mt-4">
           <p className="text-[13.5px] font-semibold">Vial</p>
@@ -121,14 +128,9 @@ export default function ProtocolDetailPage() {
           ) : (
             <p className="mt-1 text-[12.5px] text-muted">{compound.pen ? "Pen — log the mg." : "No vial yet."}</p>
           )}
-          <details className="mt-2">
-            <summary className="cursor-pointer text-[13px] font-semibold text-accent">
-              {vial ? "Mix another" : "Mix a vial"}
-            </summary>
-            <div className="mt-3">
-              <ReconCalculator saveFor={compound} initial={vial} />
-            </div>
-          </details>
+          <Disclosure nested title={vial ? "Mix another" : "Mix a vial"}>
+            <ReconCalculator saveFor={compound} initial={vial} />
+          </Disclosure>
         </div>
 
         <div className="mt-4 border-t border-line pt-4">
@@ -173,8 +175,7 @@ export default function ProtocolDetailPage() {
               ))}
             </ul>
           ) : null}
-          <details className="mt-1">
-            <summary className="cursor-pointer text-[13px] font-semibold text-accent">Plan a dose change</summary>
+          <Disclosure nested title="Plan a dose change" className="mt-1">
             <div className="mt-2 flex items-end gap-2">
               <Field label="On" className="flex-1">
                 <input type="date" value={stepDate} onChange={(e) => setStepDate(e.target.value)} />
@@ -195,7 +196,7 @@ export default function ProtocolDetailPage() {
                 Add
               </Btn>
             </div>
-          </details>
+          </Disclosure>
         </div>
 
         <div className="mt-4 border-t border-line pt-4">
@@ -319,7 +320,7 @@ export default function ProtocolDetailPage() {
         >
           Stop tracking
         </button>
-      </details>
+      </Disclosure>
     </div>
   );
 }
