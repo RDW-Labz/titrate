@@ -61,6 +61,15 @@ export default function PeptidesPage() {
   const mine = compounds.filter((c) => !c.archived);
   const active = query ? mine.filter((c) => c.name.toLowerCase().includes(query)) : mine;
   const archived = compounds.filter((c) => c.archived && (!query || c.name.toLowerCase().includes(query)));
+  const pages = [
+    { href: "/calc", label: "Calc", hint: "reconstitution" },
+    { href: "/food", label: "Food", hint: "nutrition & weight" },
+    { href: "/library", label: "Library", hint: "20 compounds" },
+    { href: "/summary", label: "Summary", hint: "for a clinician" },
+    { href: "/settings", label: "Settings", hint: "reminders, backup" },
+    { href: "/studio", label: "Studio", hint: "OpenUI cards" },
+  ].filter((p) => query && (p.label.toLowerCase().includes(query) || p.hint.includes(query)));
+
   const libraryHits = query
     ? PEPTIDES.filter(
         (p) =>
@@ -169,6 +178,22 @@ export default function PeptidesPage() {
           })}
         </ul>
       )}
+
+      {pages.length ? (
+        <div className="mt-4">
+          <p className="px-1 text-[12.5px] font-semibold text-muted">Go to</p>
+          <ul className="mt-2 divide-y divide-line overflow-hidden rounded-[22px] bg-card shadow-card">
+            {pages.map((p) => (
+              <li key={p.href}>
+                <Link href={p.href} className="press flex items-center justify-between px-4 py-3">
+                  <span className="text-[15px] font-medium">{p.label}</span>
+                  <span className="text-[12px] text-muted">{p.hint}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {libraryHits.length ? (
         <div className="mt-4">
