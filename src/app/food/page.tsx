@@ -51,6 +51,7 @@ export default function FoodPage() {
   const [back, setBack] = useState(0);
   const [draft, setDraft] = useState(BLANK);
   const [weight, setWeight] = useState("");
+  const [weightOpen, setWeightOpen] = useState(false);
 
   const day = addDays(now, -back);
   const key = dayKey(day);
@@ -103,6 +104,43 @@ export default function FoodPage() {
         <p className="mt-2 text-center text-[13px] text-muted">
           {protein >= goals.p ? "Protein done." : `${Math.max(0, goals.p - protein)} g of protein left`}
         </p>
+
+        <div className="mt-3 border-t border-line pt-3">
+          {weightOpen ? (
+            <div className="flex items-end gap-2">
+              <Field label="Weight (lb)" className="flex-1">
+                <input
+                  autoFocus
+                  inputMode="decimal"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder={latest ? String(latest.lb) : "185"}
+                />
+              </Field>
+              <Btn
+                variant="quiet"
+                disabled={!(Number(weight) > 0)}
+                onClick={() => {
+                  actions.addWeight(Number(weight));
+                  setWeight("");
+                  setWeightOpen(false);
+                }}
+              >
+                Save
+              </Btn>
+            </div>
+          ) : (
+            <button
+              onClick={() => setWeightOpen(true)}
+              className="press flex w-full items-center justify-between text-[13px] text-muted"
+            >
+              <span>
+                Weight {latest ? <span className="num font-medium text-ink">{latest.lb} lb</span> : "—"}
+              </span>
+              <span className="font-medium text-accent">{latest ? "Update" : "Add"}</span>
+            </button>
+          )}
+        </div>
       </section>
 
       <div className="mt-3 flex flex-wrap gap-2">
@@ -219,21 +257,6 @@ export default function FoodPage() {
               <Trend values={sorted.slice(-8).map((w) => w.lb)} />
             </div>
           ) : null}
-          <div className="mt-2 flex items-end gap-2">
-            <Field label="Today (lb)" className="flex-1">
-              <input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder={latest ? String(latest.lb) : "185"} />
-            </Field>
-            <Btn
-              variant="quiet"
-              disabled={!(Number(weight) > 0)}
-              onClick={() => {
-                actions.addWeight(Number(weight));
-                setWeight("");
-              }}
-            >
-              Save
-            </Btn>
-          </div>
         </div>
 
         <div className="mt-4 border-t border-line pt-4">
