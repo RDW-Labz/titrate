@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export function Chevron({ open = false, className = "" }: { open?: boolean; className?: string }) {
   return (
@@ -20,8 +20,8 @@ export function Chevron({ open = false, className = "" }: { open?: boolean; clas
 }
 
 /**
- * <details> but animated: the panel grows from 0fr to 1fr on the grid so the
- * height transition is smooth without measuring anything.
+ * <details> with a real open/close animation. Height comes from the measured
+ * panel (kept current by a ResizeObserver) so nested panels grow the parent too.
  */
 export function Disclosure({
   title,
@@ -39,15 +39,21 @@ export function Disclosure({
   nested?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const [height, setHeight] = useState(0);
+  const panel = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = panel.current;
+    if (!el) return;
+    const measure = () => setHeight(el.scrollHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
-    <div
-      className={
-        nested
-          ? className
-          : `rounded-[24px] bg-card shadow-card ${className}`
-      }
-    >
+    <div className={nested ? className : `rounded-[24px] bg-card shadow-card ${className}`}>
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
@@ -55,22 +61,19 @@ export function Disclosure({
           nested ? "py-2" : "px-4 py-3.5"
         }`}
       >
-        <span className={nested ? "text-[13px] font-semibold text-accent" : "text-[15px] font-semibold"}>
-          {title}
-        </span>
+        <span className={nested ? "text-[13px] font-semibold text-accent" : "text-[15px] font-semibold"}>{title}</span>
         <span className="flex items-center gap-2 text-muted">
           {right}
           <Chevron open={open} />
         </span>
       </button>
       <div
-        className="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(.2,.8,.2,1)]"
-        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+        className="overflow-hidden transition-[max-height,opacity] duration-300 ease-[cubic-bezier(.2,.8,.2,1)]"
+        style={{ maxHeight: open ? height : 0, opacity: open ? 1 : 0 }}
+        aria-hidden={!open}
       >
-        <div className="overflow-hidden">
-          <div className={`${nested ? "" : "px-4"} pb-4 opacity-100 transition-opacity duration-300 ${open ? "" : "opacity-0"}`}>
-            {children}
-          </div>
+        <div ref={panel} className={`${nested ? "" : "px-4"} pb-4`}>
+          {children}
         </div>
       </div>
     </div>
