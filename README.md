@@ -6,7 +6,7 @@ Mobile-first tracker for peptides and GLP-1s. Runs locally, no accounts, no serv
 ```bash
 pnpm install
 pnpm dev      # http://localhost:3000 (or 3001 if 3000 is taken)
-pnpm test     # PK + reconstitution + schedule self-checks
+pnpm test     # 20 checks: reconstitution, PK, schedule, cycles, projection
 pnpm build
 ```
 
@@ -15,8 +15,8 @@ pnpm build
 
 | Route | Job |
 |---|---|
-| `/` | Countdown-ring hero, one-tap log (locks until the next dose), site picker, week strip, side-effect chips |
-| `/protocols` | Your compounds; tap the circle to log, tap the row for detail |
+| `/` | Countdown-ring hero, one-tap log (locks until the next dose), site picker, week dots, side effects behind one row |
+| `/protocols` | Your compounds; search your stack + the library + screens; adherence ring; archive |
 | `/protocols/[id]` | Level curve with a 7-day projection; vial, dose, schedule, titration, history behind one "More" |
 | `/protocols/new` | Prefilled setup — pick a compound, everything else is guessed |
 | `/start` | First-run chooser: GLP-1 pen vs mixing your own vial |
@@ -24,7 +24,8 @@ pnpm build
 | `/food` | Day-stepped nutrition, protein rings, quick adds, weight trend |
 | `/library` | 20 compounds with half-life, peak, ranges, cycle convention |
 | `/summary` | Printable / copyable protocol summary for a clinician |
-| `/settings` | Reminders, JSON backup, doses CSV, restore, reset |
+| `/symptoms` | Side effects over the last 30 days, severity editable, delete |
+| `/settings` | Reminders, JSON backup, doses CSV, restore, reset, install hint |
 | `/studio` | OpenUI card renderer (dev surface) |
 
 ## What works
@@ -38,6 +39,10 @@ pnpm build
 - **Nutrition** — calories/protein/fiber/carbs/fat against targets, quick-add favourites, custom foods,
   weight log. Protein-forward because that is what GLP-1 users actually need to watch.
 - **GLP-1s + peptides** — 20 compounds with half-life, peak, common ranges, cycle convention.
+- **Side effects** — tap a chip once for mild, again for moderate, then severe; the last 30 days are
+  grouped by day with severity dots.
+- **Offline** — a service worker caches the shell and build assets, so the installed app opens with no
+  network. Reminders still need the app open (no push server).
 - **OpenUI card studio** (`/studio`) — 3 house components render model-written OpenUI Lang.
 
 ## Deliberately not built yet
