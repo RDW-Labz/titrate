@@ -16,7 +16,8 @@ function presetFor(p: Peptide) {
   const scheduleId = f.includes("weekly")
     ? f.includes("2×") ? "twice" : f.includes("3×") ? "three" : f.includes("1–2×") ? "weekly" : "weekly"
     : "daily";
-  const cycleId = p.cycle && /\d+\s*(wk|week)/i.test(p.cycle) ? "8-4" : "none";
+  // only guess a cycle when the library text actually mentions on AND off periods
+  const cycleId = p.cycle && /on\b/i.test(p.cycle) && /off\b/i.test(p.cycle) ? "8-4" : "none";
   return { dose: String(p.range[0]), scheduleId, cycleId, vialMg: "5", waterMl: "2" };
 }
 
