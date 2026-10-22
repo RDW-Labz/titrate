@@ -122,6 +122,21 @@ export default function SettingsPage() {
       </section>
 
       <section className="mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[15px] font-semibold">Summary</p>
+            <p className="mt-1 text-[12px] text-muted">A one-page view of your protocol to print or show a doctor.</p>
+          </div>
+          <Link
+            href="/summary"
+            className="press shrink-0 rounded-xl bg-accent-soft px-3 py-2 text-[13.5px] font-semibold text-accent"
+          >
+            Open
+          </Link>
+        </div>
+      </section>
+
+      <section className="mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
         <p className="text-[15px] font-semibold">Start over</p>
         <div className="mt-2 flex flex-wrap gap-2">
           <Btn size="sm" variant="line" onClick={() => actions.seed()}>

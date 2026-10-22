@@ -238,6 +238,32 @@ a:focus-visible {
   display: none;
 }
 
+@media print {
+  .no-print,
+  nav,
+  .app-bg,
+  .app-noise {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  .shadow-card {
+    box-shadow: none !important;
+  }
+
+  section,
+  ul {
+    break-inside: avoid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
