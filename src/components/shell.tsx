@@ -62,6 +62,8 @@ export function Shell({ children }: { children: ReactNode }) {
   // an empty protocol (and trip Next's new Date() check), so hold children until mounted
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[460px] flex-col">
+      <div aria-hidden="true" className="app-bg" />
+      <div aria-hidden="true" className="app-noise" />
       <main className="flex-1 px-4 pb-32">
         {ready ? (
           <Suspense fallback={children}>
@@ -77,6 +79,10 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         )}
       </main>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed bottom-0 left-1/2 h-28 w-full max-w-[460px] -translate-x-1/2 bg-gradient-to-t from-paper via-paper/85 to-transparent"
+      />
       <nav
         aria-label="Main"
         className="fixed bottom-[max(14px,env(safe-area-inset-bottom))] left-1/2 z-10 w-[calc(100%-24px)] max-w-[432px] -translate-x-1/2 rounded-full bg-card p-1.5 shadow-float"

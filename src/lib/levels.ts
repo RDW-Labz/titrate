@@ -1,4 +1,6 @@
 import { curve, levelAt, type Dose } from "./pk";
+import { addDays, inCycle, scheduledOn } from "./schedule";
+import { doseOn } from "./titration";
 import { PEPTIDE_BY_ID } from "./peptides";
 import type { Compound, DoseLog } from "./types";
 
@@ -41,4 +43,45 @@ export function levelWord(pct: number): string {
   if (pct < 75) return "rising";
   if (pct < 130) return "near peak";
   return "stacked";
+}
+
+export type Series = {
+  values: number[];
+  markers: number[];
+  futureMarkers: number[];
+  nowAt: number;
+  nextPeak: number;
+};
+
+/**
+ * Past curve from logged doses plus a projection of the scheduled doses ahead,
+ * so the right half of the chart shows where the next peaks land.
+ */
+export function levelSeries(doses: DoseLog[], c: Compound, now: Date, backDays = 14, fwdDays = 7): Series {
+  const from = +now - backDays * 86_400_000;
+  const to = +now + fwdDays * 86_400_000;
+
+  const past = dosesFor(doses, c.id);
+  const future: Dose[] = [];
+  for (let i = 1; i <= fwdDays; i++) {
+    const day = addDays(now, i);
+    if (!scheduledOn(c, day) || !inCycle(c, day)) continue;
+    future.push({
+      at: +new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9),
+      amount: doseOn(c, day),
+    });
+  }
+
+  const { halfLifeH, tmaxH } = halfLifeOf(c);
+  const values = curve([...past, ...future], halfLifeH, tmaxH, from, to, 130);
+  const frac = (t: number) => (t - from) / (to - from);
+  const nowAt = backDays / (backDays + fwdDays);
+
+  return {
+    values,
+    markers: past.filter((d) => d.at >= from && d.at <= to).map((d) => frac(d.at)),
+    futureMarkers: future.map((d) => frac(d.at)),
+    nowAt,
+    nextPeak: Math.max(...values.slice(Math.floor(values.length * nowAt))),
+  };
 }

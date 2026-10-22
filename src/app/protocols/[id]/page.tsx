@@ -9,7 +9,7 @@ import { ReconCalculator } from "@/components/recon-calculator";
 import { Disclosure } from "@/components/disclosure";
 import { toast } from "@/components/toast";
 import { Btn, Field, PageTitle } from "@/components/ui";
-import { levelNow, levelWindow, levelWord } from "@/lib/levels";
+import { levelNow, levelSeries, levelWord } from "@/lib/levels";
 import { dayKey, cycleInfo, humanIn, isDueOn, nextDue } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 import { doseOn, nextStep } from "@/lib/titration";
@@ -46,15 +46,7 @@ export default function ProtocolDetailPage() {
   const bud = vial ? budDaysLeft(vial, now) : null;
   const next = nextDue(compound, doses, now);
   const current = levelNow(doses, compound, now);
-  const back = 14;
-  const fwd = 1;
-  const from = +now - back * 86_400_000;
-  const to = +now + fwd * 86_400_000;
-  const markers = doses
-    .filter((d) => d.compoundId === compound.id && !d.skipped)
-    .map((d) => +new Date(d.at))
-    .filter((t) => t >= from && t <= to)
-    .map((t) => (t - from) / (to - from));
+  const series = levelSeries(doses, compound, now, 14, 7);
   const inForce = doseOn(compound, now);
   const step = nextStep(compound, now);
   const steps = [...(compound.titration ?? [])].sort((a, b) => a.at.localeCompare(b.at));
@@ -81,16 +73,18 @@ export default function ProtocolDetailPage() {
           <p className="text-[14px] text-muted">
             {isDueOn(compound, doses, now) ? "Ready when you are" : next ? `Next ${humanIn(next, now)}` : "Off cycle"}
           </p>
-          <p className="num text-[14px]">
-            {Math.round(current)}% <span className="text-muted">{levelWord(current)}</span>
+          <p className="num text-[12.5px] text-muted">
+            {Math.round(current)}% {levelWord(current)} · next peak{" "}
+            <span className="text-ink">{Math.round(series.nextPeak)}%</span>
           </p>
         </div>
         <div className="mt-2">
           <LevelChart
-            values={levelWindow(doses, compound, now, back, fwd)}
-            height={118}
-            markers={markers}
-            nowAt={back / (back + fwd)}
+            values={series.values}
+            height={136}
+            markers={series.markers}
+            futureMarkers={series.futureMarkers}
+            nowAt={series.nowAt}
           />
         </div>
         <div className="mt-4">

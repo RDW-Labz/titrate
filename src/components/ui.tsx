@@ -10,7 +10,7 @@ export function Card({
   className?: string;
   as?: "section" | "div" | "article";
 }) {
-  return <As className={`rounded-[var(--radius-card)] bg-card shadow-card ${className}`}>{children}</As>;
+  return <As className={`rounded-[var(--radius-card)] bg-card shadow-card ring-1 ring-black/[0.03] ${className}`}>{children}</As>;
 }
 
 export function PageTitle({ children, meta }: { children: ReactNode; meta?: ReactNode }) {

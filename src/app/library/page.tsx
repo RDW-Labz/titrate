@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useState } from "react";
 import { PageTitle } from "@/components/ui";
 import { PEPTIDES, halfLifeLabel } from "@/lib/peptides";
+import type { Category } from "@/lib/types";
+
+const DOT: Record<Category, string> = {
+  glp1: "bg-accent",
+  repair: "bg-[#4d8fd6]",
+  growth: "bg-[#7b6bd6]",
+  metabolic: "bg-warn",
+  cosmetic: "bg-[#c9738f]",
+  other: "bg-muted",
+};
 
 export default function LibraryPage() {
   const [q, setQ] = useState("");
@@ -27,6 +37,7 @@ export default function LibraryPage() {
         {list.map((p, i) => (
           <li key={p.id} className="enter" style={{ animationDelay: `${Math.min(i, 8) * 30}ms` }}>
             <Link href={`/library/${p.id}`} className="press flex items-center gap-3 px-4 py-3.5">
+              <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${DOT[p.category]}`} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[16px] font-medium">{p.name}</span>
                 <span className="num block truncate text-[12.5px] text-muted">
