@@ -15,7 +15,7 @@ export default function PeptidesPage() {
     <div className="pt-3">
       <div className="enter flex items-baseline justify-between px-1">
         <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.025em]">Peptides</h1>
-        <Link href="/protocols/new" className="press text-[14px] font-semibold text-accent">
+        <Link href="/start" className="press text-[14px] font-semibold text-accent">
           Add
         </Link>
       </div>
@@ -24,7 +24,7 @@ export default function PeptidesPage() {
         <div className="mt-4">
           <Empty title="Nothing here yet" body="Add the peptide you're running and set the dose once.">
             <Link
-              href="/protocols/new"
+              href="/start"
               className="press rounded-2xl bg-accent px-4 py-3.5 text-[16px] font-semibold text-white"
             >
               Add a peptide

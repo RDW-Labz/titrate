@@ -41,7 +41,7 @@ export default function TodayPage() {
           </div>
           <div className="mt-5 flex flex-col gap-2">
             <Link
-              href="/protocols/new"
+              href="/start"
               className="press rounded-2xl bg-white px-4 py-3.5 text-center text-[16px] font-semibold text-hero"
             >
               Add a peptide
