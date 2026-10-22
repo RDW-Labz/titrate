@@ -43,11 +43,12 @@ export function VialIcon(p: IconProps) {
 export function SyringeIcon(p: IconProps) {
   return (
     <S {...p}>
-      <path d="M12.4 4.6 19.4 11.6 11 20 4 13z" />
-      <path d="M11.2 3.4 20.6 12.8" />
-      <path d="M8.6 9.4l2 2" />
-      <path d="M6.4 11.6l2 2" />
-      <path d="M3.4 20.6l2.2-2.2" />
+      <path d="M9.6 3.4h4.8" />
+      <path d="M12 3.4v3" />
+      <rect x="8.4" y="6.4" width="7.2" height="10.2" rx="1.4" />
+      <path d="M8.4 9.6h2.4" />
+      <path d="M8.4 12.6h2.4" />
+      <path d="M12 16.6v4" />
     </S>
   );
 }
