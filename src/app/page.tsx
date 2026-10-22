@@ -124,7 +124,9 @@ export default function TodayPage() {
             <div className="mt-5 w-full">
               <LogDoseButton
                 compound={hero.c}
-                className="w-full !rounded-2xl !bg-white !py-4 !text-[17px] !text-hero hover:!brightness-95"
+                variant="white"
+                tone="dark"
+                className="w-full"
                 onLogged={() => setFlash(hero.c.id)}
               />
             </div>
