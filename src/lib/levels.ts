@@ -73,7 +73,9 @@ export function levelSeries(doses: DoseLog[], c: Compound, now: Date, backDays =
   }
 
   const { halfLifeH, tmaxH } = halfLifeOf(c);
-  const values = curve([...past, ...future], halfLifeH, tmaxH, from, to, 130);
+  // curve() is in dose units; scale so one dose peak reads as 100%
+  const unit = doseOn(c, now) || c.dose || 1;
+  const values = curve([...past, ...future], halfLifeH, tmaxH, from, to, 130).map((v) => (v * 100) / unit);
   const frac = (t: number) => (t - from) / (to - from);
   const nowAt = backDays / (backDays + fwdDays);
 
