@@ -254,6 +254,20 @@ a:focus-visible {
 }
 
 @media print {
+  /* every entrance animation is `both`, so a print re-layout restarts it at
+     opacity 0 — kill them and pin the page wrapper visible or the PDF is blank */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .page-in {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   .no-print,
   nav,
   .app-bg,
