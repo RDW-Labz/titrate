@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Compound, DoseLog, Food, FoodLog, Goals, State, Vial, WeightLog } from "./types";
 import { dayKey, parseDay, suggestSite } from "./schedule";
 
@@ -73,7 +73,7 @@ export function useStore(): State {
   return useSyncExternalStore(subscribe, getSnapshot, () => EMPTY);
 }
 
-/** true once the browser store has been read — gate rendering on it */
+/** true once the browser store has been read — Shell gates rendering on it */
 export function useReady(): boolean {
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);

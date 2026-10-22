@@ -52,6 +52,8 @@ function TabBar() {
 
 export function Shell({ children }: { children: ReactNode }) {
   const ready = useReady();
+  // the store only exists in the browser; rendering pages before it loads would prerender
+  // an empty protocol (and trip Next's new Date() check), so hold children until mounted
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[460px] flex-col">
       <main className="flex-1 px-4 pb-32">
