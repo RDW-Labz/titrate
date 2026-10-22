@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Btn, Field, PageTitle, Ring } from "@/components/ui";
 import { Disclosure } from "@/components/disclosure";
 import { addDays, dayKey } from "@/lib/schedule";
@@ -9,31 +9,39 @@ import { actions, useStore } from "@/lib/store";
 const BLANK = { name: "", kcal: "", p: "", c: "", f: "", fiber: "" };
 
 function Trend({ values }: { values: number[] }) {
+  const id = useId().replace(/[:]/g, "");
   if (values.length < 2) return null;
-  const w = 240;
-  const h = 44;
+  const w = 280;
+  const h = 56;
+  const pad = 6;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = Math.max(0.1, max - min);
-  const pts = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * w;
-    const y = h - 4 - ((v - min) / span) * (h - 8);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
+  const y = (v: number) => h - pad - ((v - min) / span) * (h - pad * 2);
+  const pts = values.map((v, i) => [(i / (values.length - 1)) * w, y(v)] as const);
+  const line = pts.map(([x, yy], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${yy.toFixed(1)}`).join(" ");
+  const area = `${line} L${w},${h} L0,${h} Z`;
+  const last = pts[pts.length - 1];
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} role="img" aria-label={`Weight trend, ${min} to ${max} lb`}>
-      <polyline
-        points={pts.join(" ")}
-        fill="none"
-        stroke="var(--color-accent)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="chart-line"
-        pathLength={1}
-      />
-      <circle cx={w} cy={pts[pts.length - 1].split(",")[1]} r="3" fill="var(--color-accent)" />
-    </svg>
+    <div>
+      <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none" role="img" aria-label={`Weight trend, ${min} to ${max} lb`}>
+        <defs>
+          <linearGradient id={`tg-${id}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#5ec8a8" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#5ec8a8" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <line x1="0" x2={w} y1={y(min)} y2={y(min)} stroke="var(--color-line)" strokeDasharray="3 5" vectorEffect="non-scaling-stroke" />
+        <path d={area} fill={`url(#tg-${id})`} />
+        <path d={line} pathLength={1} className="chart-line" fill="none" stroke="var(--color-accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        <circle cx={last[0]} cy={last[1]} r="3.5" fill="var(--color-accent)" />
+      </svg>
+      <div className="num flex justify-between text-[10.5px] text-muted">
+        <span>{min} lb</span>
+        <span>{max} lb</span>
+      </div>
+    </div>
   );
 }
 

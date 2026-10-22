@@ -46,6 +46,15 @@ export default function ProtocolDetailPage() {
   const bud = vial ? budDaysLeft(vial, now) : null;
   const next = nextDue(compound, doses, now);
   const current = levelNow(doses, compound, now);
+  const back = 14;
+  const fwd = 1;
+  const from = +now - back * 86_400_000;
+  const to = +now + fwd * 86_400_000;
+  const markers = doses
+    .filter((d) => d.compoundId === compound.id && !d.skipped)
+    .map((d) => +new Date(d.at))
+    .filter((t) => t >= from && t <= to)
+    .map((t) => (t - from) / (to - from));
   const inForce = doseOn(compound, now);
   const step = nextStep(compound, now);
   const steps = [...(compound.titration ?? [])].sort((a, b) => a.at.localeCompare(b.at));
@@ -77,7 +86,12 @@ export default function ProtocolDetailPage() {
           </p>
         </div>
         <div className="mt-2">
-          <LevelChart values={levelWindow(doses, compound, now, 14, 1)} height={64} />
+          <LevelChart
+            values={levelWindow(doses, compound, now, back, fwd)}
+            height={118}
+            markers={markers}
+            nowAt={back / (back + fwd)}
+          />
         </div>
         <div className="mt-4">
           <LogDoseButton compound={compound} className="w-full" />

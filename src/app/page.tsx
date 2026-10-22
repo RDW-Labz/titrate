@@ -72,6 +72,18 @@ export default function TodayPage() {
   const elapsed = last ? +now - +new Date(last.at) : total;
   const progress = hero?.due ? 1 : Math.min(1, Math.max(0.04, elapsed / Math.max(1, total)));
 
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i));
+    const k = dayKey(d);
+    return {
+      key: k,
+      letter: d.toLocaleDateString(undefined, { weekday: "narrow" }),
+      today: k === dayKey(now),
+      logged: doses.filter((x) => !x.skipped && dayKey(new Date(x.at)) === k).length,
+      due: compounds.some((c) => isDueOn(c, doses, d)),
+    };
+  });
+
   const todayFood = foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now));
   const todaySymptoms = symptoms.filter((x) => dayKey(new Date(x.at)) === dayKey(now));
   const kcal = todayFood.reduce((n, f) => n + f.kcal, 0);
@@ -136,6 +148,19 @@ export default function TodayPage() {
           </div>
         </section>
       ) : null}
+
+      <div className="enter mt-3 flex items-end justify-between rounded-[22px] bg-card px-4 py-3 shadow-card" style={{ animationDelay: "70ms" }}>
+        {weekDays.map((d) => {
+          const count = d.logged;
+          const done = count > 0;
+          return (
+            <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
+              <span className={`size-2 rounded-full ${done ? "bg-accent" : d.due ? "bg-warn/60" : "bg-line"}`} />
+              <span className={`text-[10.5px] ${d.today ? "font-semibold text-ink" : "text-muted"}`}>{d.letter}</span>
+            </div>
+          );
+        })}
+      </div>
 
       {others.length > 0 ? (
         <ul className="mt-3 space-y-2.5">

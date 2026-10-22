@@ -25,7 +25,9 @@ html {
 }
 
 body {
-  background: var(--color-paper);
+  background:
+    radial-gradient(900px 420px at 50% -8%, #f8fafc 0%, rgba(248, 250, 252, 0) 70%),
+    var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 15px;
