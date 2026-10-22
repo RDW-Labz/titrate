@@ -75,11 +75,21 @@ export default function SummaryPage() {
                   ? `Side effects: ${Object.entries(symptomCounts).map(([k, v]) => `${k} ×${v}`).join(", ")}`
                   : "",
               ].filter(Boolean);
+              const text = lines.join("\n");
               try {
-                await navigator.clipboard.writeText(lines.join("\n"));
+                await navigator.clipboard.writeText(text);
                 toast("Copied");
               } catch {
-                toast("Clipboard blocked");
+                // clipboard API is gated in some browsers; the textarea trick still works
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                ta.style.position = "fixed";
+                ta.style.opacity = "0";
+                document.body.append(ta);
+                ta.select();
+                const ok = document.execCommand("copy");
+                ta.remove();
+                toast(ok ? "Copied" : "Select the text to copy");
               }
             }}
           >
