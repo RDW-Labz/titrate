@@ -277,10 +277,18 @@ export default function TodayPage() {
         logged={todaySymptoms}
         onToggle={(name) => {
           const hits = todaySymptoms.filter((x) => x.name === name);
-          if (hits.length) hits.forEach((x) => actions.deleteSymptom(x.id));
-          else {
-            actions.logSymptom(name);
-            toast(`Noted ${name.toLowerCase()}`);
+          if (!hits.length) {
+            actions.logSymptom(name, 1);
+            toast(`${name} · mild`);
+            return;
+          }
+          const sev = Math.max(...hits.map((h) => h.severity));
+          if (sev < 3) {
+            hits.forEach((h) => actions.updateSymptom(h.id, { severity: (sev + 1) as 1 | 2 | 3 }));
+            toast(`${name} · ${sev + 1 === 2 ? "moderate" : "severe"}`);
+          } else {
+            hits.forEach((h) => actions.deleteSymptom(h.id));
+            toast(`${name} cleared`);
           }
         }}
       />
@@ -296,7 +304,7 @@ function SymptomSheet({
 }: {
   open: boolean;
   onClose: () => void;
-  logged: { id: string; name: string }[];
+  logged: { id: string; name: string; severity: 1 | 2 | 3 }[];
   onToggle: (name: string) => void;
 }) {
   if (!open) return null;
@@ -306,21 +314,32 @@ function SymptomSheet({
       <div className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))]">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
         <p className="text-[16px] font-semibold">Any side effects?</p>
-        <p className="mt-0.5 text-[12.5px] text-muted">Tap what you feel today — tap again to remove.</p>
+        <p className="mt-0.5 text-[12.5px] text-muted">
+          Tap once for mild, again for moderate, again for severe, once more to clear.
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {SYMPTOMS.map((name) => {
-            const hit = logged.filter((x) => x.name === name).length;
+            const hits = logged.filter((x) => x.name === name);
+            const sev = hits.length ? Math.max(...hits.map((h) => h.severity)) : 0;
             return (
               <button
                 key={name}
                 onClick={() => onToggle(name)}
-                aria-pressed={hit > 0}
-                className={`press rounded-full px-3.5 py-2 text-[13.5px] font-medium ${
-                  hit ? "bg-warn-soft text-warn" : "bg-paper text-muted"
+                aria-pressed={hits.length > 0}
+                aria-label={`${name}${sev ? `, severity ${sev} of 3` : ""}`}
+                className={`press flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13.5px] font-medium ${
+                  hits.length ? "bg-warn-soft text-warn" : "bg-paper text-muted"
                 }`}
               >
-                {hit > 1 ? `${hit}× ` : ""}
                 {name}
+                {hits.length > 1 ? <span className="text-[11px] opacity-70">×{hits.length}</span> : null}
+                {sev ? (
+                  <span className="flex gap-0.5" aria-hidden="true">
+                    {[1, 2, 3].map((n) => (
+                      <span key={n} className={`size-1 rounded-full ${n <= sev ? "bg-warn" : "bg-warn/25"}`} />
+                    ))}
+                  </span>
+                ) : null}
               </button>
             );
           })}
