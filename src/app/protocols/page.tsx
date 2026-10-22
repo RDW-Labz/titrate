@@ -6,6 +6,8 @@ import { Empty } from "@/components/ui";
 import { cycleInfo, humanIn, isDueOn, nextDue } from "@/lib/schedule";
 import { useStore } from "@/lib/store";
 import { doseOn } from "@/lib/titration";
+import { PEPTIDE_BY_ID } from "@/lib/peptides";
+import { CATEGORY_DOT } from "@/lib/category-color";
 
 export default function PeptidesPage() {
   const { compounds, doses } = useStore();
@@ -43,7 +45,12 @@ export default function PeptidesPage() {
                 className="enter flex items-center gap-3 rounded-[22px] bg-card px-4 py-3.5 shadow-card"
                 style={{ animationDelay: `${i * 45}ms` }}
               >
-                <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
+                <Link href={`/protocols/${c.id}`} className="flex min-w-0 flex-1 items-center gap-2.5">
+                  <span
+                    aria-hidden="true"
+                    className={`size-2 shrink-0 rounded-full ${CATEGORY_DOT[PEPTIDE_BY_ID.get(c.peptideId)?.category ?? "other"]}`}
+                  />
+                  <span className="min-w-0 flex-1">
                   <p className="truncate text-[17px] font-medium">{c.name}</p>
                   <p className="num text-[13px] text-muted">
                     {doseOn(c, now)} {c.unit}
@@ -55,6 +62,7 @@ export default function PeptidesPage() {
                           ? ` · ${humanIn(next, now)}`
                           : ""}
                   </p>
+                  </span>
                 </Link>
                 {due ? (
                   <LogDot compound={c} />

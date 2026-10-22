@@ -18,6 +18,42 @@ function lastCalc(): LastCalc | null {
   }
 }
 
+/** the barrel, drawn to scale: ticks every 10 units, fill to the drawn amount */
+function SyringeBar({ units, maxUnits, over }: { units: number; maxUnits: number; over: boolean }) {
+  const pct = Math.max(0, Math.min(1, units / maxUnits));
+  const ticks = Array.from({ length: 11 }, (_, i) => i / 10);
+
+  return (
+    <div className="mt-3">
+      <div className="relative h-10">
+        {ticks.map((t, i) => (
+          <span
+            key={t}
+            className="absolute top-0 h-2 w-px bg-line"
+            style={{ left: `${t * 100}%`, height: i % 5 === 0 ? 10 : 6, opacity: i % 5 === 0 ? 0.9 : 0.55 }}
+          />
+        ))}
+        <div className="absolute top-3 right-0 left-0 h-7 overflow-hidden rounded-full bg-line/70">
+          <div
+            className={`h-full rounded-full transition-[width] duration-500 ${over ? "bg-alert/70" : "bg-accent/80"}`}
+            style={{ width: `${pct * 100}%` }}
+          />
+        </div>
+        <span
+          aria-hidden="true"
+          className="absolute top-2 bottom-0 w-0.5 -translate-x-1/2 rounded-full bg-ink"
+          style={{ left: `${pct * 100}%` }}
+        />
+      </div>
+      <div className="num mt-1 flex justify-between text-[10px] text-muted">
+        <span>0</span>
+        <span>{Math.round(maxUnits / 2)}</span>
+        <span>{maxUnits} u</span>
+      </div>
+    </div>
+  );
+}
+
 export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; initial?: Partial<Vial> }) {
   // standalone use remembers the last mix; a protocol's own vial always wins
   const [seed] = useState<LastCalc | null>(() => (initial || saveFor ? null : lastCalc()));
@@ -31,7 +67,7 @@ export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; init
     try {
       localStorage.setItem(LAST, JSON.stringify({ vialMg, waterMl, dose, syringeId }));
     } catch {
-      // ignore storage failures — the calculator still works in memory
+      // the calculator still works in memory if storage is blocked
     }
   }, [vialMg, waterMl, dose, syringeId]);
 
@@ -42,7 +78,7 @@ export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; init
     doseMcg: Number(dose),
     unitsPerMl: syringe.unitsPerMl,
   });
-  const tooBig = result ? result.units > syringe.maxUnits : false;
+  const over = result ? result.units > syringe.maxUnits : false;
 
   return (
     <div>
@@ -67,10 +103,7 @@ export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; init
         </Field>
       </div>
 
-      <div
-        className={`mt-3 rounded-[20px] px-4 py-4 ${tooBig ? "bg-alert-soft" : "bg-paper"}`}
-        aria-live="polite"
-      >
+      <div className={`mt-3 rounded-[20px] px-4 py-4 ${over ? "bg-alert-soft" : "bg-paper"}`} aria-live="polite">
         {result ? (
           <>
             <p className="text-[12px] font-medium text-muted">Draw to</p>
@@ -78,7 +111,8 @@ export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; init
               {formatUnits(result.units)}
               <span className="ml-2 text-[15px] font-medium text-muted">units</span>
             </p>
-            <p className="mt-1.5 text-[12.5px] text-muted">{syringe.label}</p>
+
+            <SyringeBar units={result.units} maxUnits={syringe.maxUnits} over={over} />
 
             <div className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-3">
               <Stat label="Doses" value={Math.floor(result.dosesPerVial)} sub="per vial" />
@@ -86,7 +120,7 @@ export function ReconCalculator({ saveFor, initial }: { saveFor?: Compound; init
               <Stat label="Volume" value={result.doseMl.toFixed(3)} sub="mL" />
             </div>
 
-            {tooBig ? (
+            {over ? (
               <p className="mt-3 text-[12.5px] text-alert">
                 More than this barrel holds — add water or pick a bigger syringe.
               </p>
