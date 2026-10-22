@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useId, useState } from "react";
 import { Btn, Field, PageTitle, Ring } from "@/components/ui";
 import { toast } from "@/components/toast";
@@ -166,6 +168,9 @@ export default function FoodPage() {
               <span className="font-medium text-accent">{latest ? "Update" : "Add"}</span>
             </button>
           )}
+          <Link href="/photos" className="press mt-2 block text-[12.5px] font-medium text-accent">
+            Progress photos ›
+          </Link>
         </div>
       </section>
 
