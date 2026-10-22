@@ -234,6 +234,21 @@ a:focus-visible {
   animation: toast-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.sheet-in {
+  animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 .scroll-hide::-webkit-scrollbar {
   display: none;
 }

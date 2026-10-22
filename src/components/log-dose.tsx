@@ -6,13 +6,23 @@ import { toast } from "./toast";
 import { actions, useStore } from "@/lib/store";
 import { toMcg, unitsForDose } from "@/lib/recon";
 import { doseOn } from "@/lib/titration";
-import { SITES, dayKey, suggestSite } from "@/lib/schedule";
+import { SITES, dayKey, daysBetween, suggestSite } from "@/lib/schedule";
+import { SitePicker } from "./site-picker";
 import type { Compound } from "@/lib/types";
 
 function useLog(compound: Compound, onLogged?: () => void) {
   const { vials, doses } = useStore();
   const [flash, setFlash] = useState(false);
   const [site, setSite] = useState(() => suggestSite(doses));
+  const [picker, setPicker] = useState(false);
+  const lastUsed = SITES.reduce<Record<string, number>>((acc, name) => {
+    const hits = doses.filter((d) => d.site === name && !d.skipped);
+    if (hits.length) {
+      const latest = Math.max(...hits.map((d) => +new Date(d.at)));
+      acc[name] = daysBetween(new Date(latest), new Date());
+    }
+    return acc;
+  }, {});
   const vial = vials.find((v) => v.id === compound.vialId);
 
   const today = dayKey(new Date());
@@ -39,7 +49,7 @@ function useLog(compound: Compound, onLogged?: () => void) {
     toast(`Skipped ${compound.name} today`, { label: "Undo", run: () => actions.deleteDose(entry.id) });
   };
 
-  return { flash, log, skip, lastTime, skipped, site, setSite };
+  return { flash, log, skip, lastTime, skipped, site, setSite, picker, setPicker, lastUsed };
 }
 
 export function LogDoseButton({
@@ -57,7 +67,7 @@ export function LogDoseButton({
   onLogged?: () => void;
   tone?: "light" | "dark";
 }) {
-  const { flash, log, skip, lastTime, skipped, site, setSite } = useLog(compound, onLogged);
+  const { flash, log, skip, lastTime, skipped, site, setSite, picker, setPicker, lastUsed } = useLog(compound, onLogged);
 
   if (lastTime) {
     return (
@@ -109,11 +119,15 @@ export function LogDoseButton({
         <Burst show={flash} />
         <span className={flash ? "pop" : ""}>Log it</span>
       </Btn>
+      <SitePicker
+        open={picker}
+        value={site}
+        lastUsed={lastUsed}
+        onClose={() => setPicker(false)}
+        onPick={setSite}
+      />
       <div className={`mt-1.5 flex items-center justify-between text-[12px] ${tone === "dark" ? "text-white/65" : "text-muted"}`}>
-        <button
-          onClick={() => setSite(SITES[(SITES.indexOf(site) + 1) % SITES.length])}
-          className="press underline underline-offset-2"
-        >
+        <button onClick={() => setPicker(true)} className="press underline underline-offset-2">
           Site: {site.toLowerCase()}
         </button>
         <button onClick={skip} className="press underline underline-offset-2">
