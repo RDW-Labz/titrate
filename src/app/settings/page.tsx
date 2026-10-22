@@ -97,6 +97,42 @@ export default function SettingsPage() {
           >
             Download
           </Btn>
+          <Btn
+            size="sm"
+            variant="line"
+            onClick={() => {
+              const rows = [
+                ["date", "time", "compound", "dose", "unit", "units_drawn", "site", "skipped"],
+                ...state.doses
+                  .slice()
+                  .sort((a, b) => +new Date(a.at) - +new Date(b.at))
+                  .map((d) => {
+                    const at = new Date(d.at);
+                    const c = state.compounds.find((x) => x.id === d.compoundId);
+                    return [
+                      at.toLocaleDateString("en-CA"),
+                      at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+                      c?.name ?? "",
+                      String(d.dose),
+                      d.unit,
+                      d.units ? String(d.units) : "",
+                      d.site ?? "",
+                      d.skipped ? "yes" : "",
+                    ];
+                  }),
+              ];
+              const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
+              const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `titrate-doses-${new Date().toISOString().slice(0, 10)}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+              toast("Doses exported");
+            }}
+          >
+            Doses CSV
+          </Btn>
           <Btn size="sm" variant="line" onClick={() => fileRef.current?.click()}>
             Restore
           </Btn>
