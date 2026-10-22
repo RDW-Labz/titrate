@@ -30,4 +30,12 @@ pnpm build
 - No barcode/photo food database; foods are manual + favourites.
 - No assistant chat yet: `/studio` proves the render half, the model call is the next step.
 
+## Deploy
+
+Next 16, no env vars, no database (data is per-browser localStorage).
+
+1. Vercel → **Add New → Project → Import** `RDW-Labz/titrate`.
+2. Framework preset: Next.js. Nothing else to configure.
+3. After the first deploy, open the URL on a phone and **Add to Home Screen** — the manifest and icon are already in place.
+
 Reference values are published pharmacology for tracking only — the app does not recommend doses.
