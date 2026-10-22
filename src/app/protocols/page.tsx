@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LogDot } from "@/components/log-dose";
 import { toast } from "@/components/toast";
 import { Empty } from "@/components/ui";
@@ -56,6 +56,10 @@ export default function PeptidesPage() {
   const now = new Date();
   const [showArchived, setShowArchived] = useState(false);
   const [q, setQ] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("focus") === "search") searchRef.current?.focus();
+  }, []);
 
   const query = q.trim().toLowerCase();
   const mine = compounds.filter((c) => !c.archived);
@@ -101,6 +105,7 @@ export default function PeptidesPage() {
           <path d="M16 16l4.5 4.5" />
         </svg>
         <input
+          ref={searchRef}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search your peptides or the library"

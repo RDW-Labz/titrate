@@ -116,9 +116,17 @@ export default function TodayPage() {
             {now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
           </span>
         </div>
-        <Link href="/settings" aria-label="Settings" className="press -mr-1 p-1.5 text-muted">
-          <GearIcon className="size-[21px]" />
-        </Link>
+        <span className="flex items-center gap-1">
+          <Link href="/protocols?focus=search" aria-label="Search" className="press p-1.5 text-muted">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true" className="size-[21px]">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="M16 16l4.5 4.5" />
+            </svg>
+          </Link>
+          <Link href="/settings" aria-label="Settings" className="press -mr-1 p-1.5 text-muted">
+            <GearIcon className="size-[21px]" />
+          </Link>
+        </span>
       </div>
 
       {hero ? (
