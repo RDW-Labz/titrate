@@ -75,7 +75,7 @@ export function LogDoseButton({
         <button
           onClick={log}
           className={`press mt-1.5 w-full text-center text-[12px] underline underline-offset-2 ${
-            tone === "dark" ? "text-white/45" : "text-muted"
+            tone === "dark" ? "text-white/65" : "text-muted"
           }`}
         >
           Add another dose
@@ -94,7 +94,7 @@ export function LogDoseButton({
         >
           Skipped today
         </div>
-        <div className={`mt-1.5 flex justify-center gap-4 text-[12px] ${tone === "dark" ? "text-white/45" : "text-muted"}`}>
+        <div className={`mt-1.5 flex justify-center gap-4 text-[12px] ${tone === "dark" ? "text-white/65" : "text-muted"}`}>
           <button onClick={log} className="press underline underline-offset-2">
             Log it anyway
           </button>
@@ -109,7 +109,7 @@ export function LogDoseButton({
         <Burst show={flash} />
         <span className={flash ? "pop" : ""}>Log it</span>
       </Btn>
-      <div className={`mt-1.5 flex items-center justify-between text-[12px] ${tone === "dark" ? "text-white/45" : "text-muted"}`}>
+      <div className={`mt-1.5 flex items-center justify-between text-[12px] ${tone === "dark" ? "text-white/65" : "text-muted"}`}>
         <button
           onClick={() => setSite(SITES[(SITES.indexOf(site) + 1) % SITES.length])}
           className="press underline underline-offset-2"

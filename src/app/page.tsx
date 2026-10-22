@@ -155,7 +155,7 @@ export default function TodayPage() {
                 onLogged={() => setFlash(hero.c.id)}
               />
             </div>
-            <p className="mt-2.5 text-[12px] text-white/40">
+            <p className="mt-2.5 text-[12px] text-white/55">
               {last ? `Last ${humanIn(new Date(last.at), now)}${last.site ? ` · ${last.site}` : ""}` : "First dose"}
             </p>
             {vialWarn ? (
