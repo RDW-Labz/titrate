@@ -37,12 +37,14 @@ function NewProtocol() {
     return id ? (PEPTIDE_BY_ID.get(id) ?? null) : null;
   });
 
-  const [dose, setDose] = useState("");
-  const [scheduleId, setScheduleId] = useState("daily");
-  const [cycleId, setCycleId] = useState("none");
+  // a deep link (?p=tirzepatide) must arrive fully prefilled, not just with a name
+  const preset = peptide ? presetFor(peptide) : null;
+  const [dose, setDose] = useState(() => preset?.dose ?? "");
+  const [scheduleId, setScheduleId] = useState(() => preset?.scheduleId ?? "daily");
+  const [cycleId, setCycleId] = useState(() => preset?.cycleId ?? "none");
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [vialMg, setVialMg] = useState("5");
-  const [waterMl, setWaterMl] = useState("2");
+  const [vialMg, setVialMg] = useState(() => preset?.vialMg ?? "5");
+  const [waterMl, setWaterMl] = useState(() => preset?.waterMl ?? "2");
 
   function choose(p: Peptide) {
     const preset = presetFor(p);
