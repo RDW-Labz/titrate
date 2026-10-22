@@ -219,7 +219,7 @@ export default function ProtocolDetailPage() {
                   </span>
                   <button
                     aria-label={`Remove step ${s.at}`}
-                    className="press px-1 text-[13px] text-muted"
+                    className="press grid size-9 place-items-center text-[13px] text-muted"
                     onClick={() => actions.setTitration(compound.id, steps.filter((x) => x !== s))}
                   >
                     ✕
@@ -274,14 +274,17 @@ export default function ProtocolDetailPage() {
                           }
                         }}
                       />
-                      <button className="press px-2 text-[13px] text-accent" onClick={() => setEditing(null)}>
+                      <button
+                        className="press grid min-h-[38px] place-items-center px-3 text-[13px] font-semibold text-accent"
+                        onClick={() => setEditing(null)}
+                      >
                         Done
                       </button>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
                       <button
-                        className="press num text-left text-[13.5px]"
+                        className="press num min-h-[38px] text-left text-[13.5px]"
                         onClick={() => setEditing(d.id)}
                         aria-label={`Edit time for dose on ${dayKey(at)}`}
                       >
@@ -296,7 +299,7 @@ export default function ProtocolDetailPage() {
                       </span>
                       <button
                         aria-label={`Delete dose ${dayKey(at)}`}
-                        className="press px-1 text-[13px] text-muted"
+                        className="press grid size-9 place-items-center text-[13px] text-muted"
                         onClick={() => actions.deleteDose(d.id)}
                       >
                         ✕

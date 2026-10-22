@@ -81,7 +81,7 @@ export default function FoodPage() {
               <button
                 aria-label={`Delete ${f.name}`}
                 onClick={() => actions.deleteFood(f.id)}
-                className="press px-2 text-[15px] text-muted"
+                className="press grid size-9 place-items-center text-[15px] text-muted"
               >
                 ✕
               </button>
