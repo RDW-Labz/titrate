@@ -76,6 +76,16 @@ export default function SummaryPage() {
                   : "",
               ].filter(Boolean);
               const text = lines.join("\n");
+              // share sheet first on phones, clipboard second, textarea last
+              if (navigator.share) {
+                try {
+                  await navigator.share({ title: "Protocol summary", text });
+                  toast("Shared");
+                  return;
+                } catch {
+                  // user dismissed the sheet — fall through to the clipboard
+                }
+              }
               try {
                 await navigator.clipboard.writeText(text);
                 toast("Copied");

@@ -10,6 +10,23 @@ pnpm test     # PK + reconstitution + schedule self-checks
 pnpm build
 ```
 
+
+## Screens
+
+| Route | Job |
+|---|---|
+| `/` | Countdown-ring hero, one-tap log (locks until the next dose), site picker, week strip, side-effect chips |
+| `/protocols` | Your compounds; tap the circle to log, tap the row for detail |
+| `/protocols/[id]` | Level curve with a 7-day projection; vial, dose, schedule, titration, history behind one "More" |
+| `/protocols/new` | Prefilled setup — pick a compound, everything else is guessed |
+| `/start` | First-run chooser: GLP-1 pen vs mixing your own vial |
+| `/calc` | Reconstitution: vial + water → units to draw, with the barrel drawn to scale |
+| `/food` | Day-stepped nutrition, protein rings, quick adds, weight trend |
+| `/library` | 20 compounds with half-life, peak, ranges, cycle convention |
+| `/summary` | Printable / copyable protocol summary for a clinician |
+| `/settings` | Reminders, JSON backup, doses CSV, restore, reset |
+| `/studio` | OpenUI card renderer (dev surface) |
+
 ## What works
 
 - **Dose + cycle tracking** — per compound: dose, schedule (every N days or Mon/Thu style), on/off
