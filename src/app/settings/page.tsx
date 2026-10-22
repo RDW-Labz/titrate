@@ -13,28 +13,25 @@ const BACKUP = "titrate.v1.backup";
 
 export default function SettingsPage() {
   const state = useStore();
-  const [perm, setPerm] = useState<string>("default");
+  const [perm, setPerm] = useState("default");
   const [on, setOn] = useState(false);
-  const [bytes, setBytes] = useState(0);
+  const [kb, setKb] = useState("0");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setPerm(typeof Notification === "undefined" ? "unsupported" : Notification.permission);
     setOn(localStorage.getItem(REMINDERS_KEY) === "1");
-    setBytes((localStorage.getItem(KEY) ?? "").length);
+    setKb(((localStorage.getItem(KEY) ?? "").length / 1024).toFixed(1));
   }, [state]);
 
-  function restore(raw: string | null, what: string) {
-    if (!raw) {
-      toast(`No ${what} found`);
-      return;
-    }
+  function restore(raw: string | null, label: string) {
+    if (!raw) return toast("Nothing saved yet");
     try {
       const parsed = JSON.parse(raw) as Partial<State>;
       actions.replace({ ...EMPTY, ...parsed, goals: { ...EMPTY.goals, ...parsed.goals } });
-      toast(`Restored ${what}`);
+      toast(`Restored ${label}`);
     } catch {
-      toast("That file didn't parse");
+      toast("That file didn't open");
     }
   }
 
@@ -43,80 +40,68 @@ export default function SettingsPage() {
       <Link href="/" className="press text-[14px] font-medium text-accent">
         ‹ Today
       </Link>
-      <PageTitle meta="Reminders, backups, and what this app keeps on your device.">Settings</PageTitle>
+      <PageTitle>Settings</PageTitle>
 
       <section className="rounded-[24px] bg-card px-4 py-4 shadow-card">
-        <p className="text-[15px] font-semibold">Reminders</p>
-        <p className="mt-1 text-[13px] text-muted">
-          A notification when a dose is due. Fires while the app is open or installed — there is no server, so
-          nothing arrives after you close it.
-        </p>
-        <div className="mt-3 flex items-center gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[15px] font-semibold">Reminders</p>
           {perm === "unsupported" ? (
-            <span className="text-[13px] text-muted">This browser can’t show notifications.</span>
+            <span className="text-[12.5px] text-muted">Not supported</span>
           ) : on && perm === "granted" ? (
-            <>
-              <Btn
-                variant="quiet"
-                onClick={() => {
-                  localStorage.removeItem(REMINDERS_KEY);
-                  setOn(false);
-                  toast("Reminders off");
-                }}
-              >
-                Turn off
-              </Btn>
-              <span className="text-[13px] text-muted">On · permission granted</span>
-            </>
+            <Btn
+              size="sm"
+              variant="quiet"
+              onClick={() => {
+                localStorage.removeItem(REMINDERS_KEY);
+                setOn(false);
+                toast("Reminders off");
+              }}
+            >
+              On
+            </Btn>
           ) : (
-            <>
-              <Btn
-                onClick={async () => {
-                  const p = await Notification.requestPermission();
-                  setPerm(p);
-                  if (p === "granted") {
-                    localStorage.setItem(REMINDERS_KEY, "1");
-                    setOn(true);
-                    toast("Reminders on");
-                  } else {
-                    toast("Notifications are blocked in this browser");
-                  }
-                }}
-              >
-                Enable reminders
-              </Btn>
-              {perm === "denied" ? (
-                <span className="text-[13px] text-alert">Blocked — allow notifications in site settings.</span>
-              ) : null}
-            </>
+            <Btn
+              size="sm"
+              onClick={async () => {
+                const p = await Notification.requestPermission();
+                setPerm(p);
+                if (p === "granted") {
+                  localStorage.setItem(REMINDERS_KEY, "1");
+                  setOn(true);
+                  toast("Reminders on");
+                } else toast("Blocked in this browser");
+              }}
+            >
+              Enable
+            </Btn>
           )}
         </div>
+        <p className="mt-1 text-[12px] text-muted">A ping when a dose is due, while the app is open.</p>
       </section>
 
       <section className="mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
-        <p className="text-[15px] font-semibold">Your data</p>
-        <p className="num mt-1 text-[12.5px] text-muted">
-          {state.compounds.length} peptides · {state.doses.length} doses · {state.foods.length} meals ·{" "}
-          {(bytes / 1024).toFixed(1)} KB on this device
-        </p>
-        <div className="mt-3 grid gap-2">
+        <p className="text-[15px] font-semibold">Backup</p>
+        <div className="mt-2 flex flex-wrap gap-2">
           <Btn
+            size="sm"
             variant="quiet"
             onClick={() => {
-              const raw = localStorage.getItem(KEY) ?? "{}";
-              const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
+              const url = URL.createObjectURL(new Blob([localStorage.getItem(KEY) ?? "{}"], { type: "application/json" }));
               const a = document.createElement("a");
               a.href = url;
               a.download = `titrate-${new Date().toISOString().slice(0, 10)}.json`;
               a.click();
               URL.revokeObjectURL(url);
-              toast("Backup downloaded");
+              toast("Saved a copy");
             }}
           >
-            Download a backup
+            Download
           </Btn>
-          <Btn variant="line" onClick={() => fileRef.current?.click()}>
-            Restore from a file
+          <Btn size="sm" variant="line" onClick={() => fileRef.current?.click()}>
+            Restore
+          </Btn>
+          <Btn size="sm" variant="line" onClick={() => restore(localStorage.getItem(BACKUP), "last change")}>
+            Undo last change
           </Btn>
           <input
             ref={fileRef}
@@ -130,28 +115,26 @@ export default function SettingsPage() {
               e.target.value = "";
             }}
           />
-          <Btn variant="line" onClick={() => restore(localStorage.getItem(BACKUP), "last snapshot")}>
-            Undo the last change
-          </Btn>
         </div>
-        <p className="mt-2 text-[12px] text-muted">
-          Every save also keeps one previous snapshot on this device, so a bad edit is one tap away.
+        <p className="num mt-1 text-[12px] text-muted">
+          {state.compounds.length} peptides · {state.doses.length} doses · {kb} KB on this device
         </p>
       </section>
 
       <section className="mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
         <p className="text-[15px] font-semibold">Start over</p>
-        <div className="mt-3 grid gap-2">
-          <Btn variant="line" onClick={() => actions.seed()}>
-            Load sample data
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Btn size="sm" variant="line" onClick={() => actions.seed()}>
+            Load sample
           </Btn>
           <Btn
+            size="sm"
             variant="line"
             className="!text-alert"
             onClick={() => {
-              if (confirm("Delete every peptide, dose and meal on this device? The last snapshot is kept.")) {
+              if (confirm("Delete everything on this device?")) {
                 actions.reset();
-                toast("Cleared — undo is in Your data");
+                toast("Deleted — undo is under Backup");
               }
             }}
           >
@@ -160,9 +143,8 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <p className="mt-4 px-1 text-[12px] leading-relaxed text-muted">
-        Titrate stores everything in this browser. No account, no server, nothing leaves the device unless you
-        download it. Tracking only — not medical advice.
+      <p className="mt-4 px-1 text-[12px] text-muted">
+        Everything stays on this device. Tracking only, not medical advice.
       </p>
     </div>
   );
