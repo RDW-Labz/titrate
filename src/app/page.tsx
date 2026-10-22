@@ -255,9 +255,9 @@ export default function TodayPage() {
       <section className="enter mt-3 rounded-[22px] bg-card px-4 py-4 shadow-card" style={{ animationDelay: "250ms" }}>
         <div className="flex items-baseline justify-between">
           <p className="text-[15px] font-medium">Any side effects?</p>
-          <span className="num text-[12px] text-muted">
-            {todaySymptoms.length ? `${todaySymptoms.length} today` : "tap any"}
-          </span>
+          <Link href="/symptoms" className="press -my-1 py-1 text-[12px] font-medium text-accent">
+            {todaySymptoms.length ? `${todaySymptoms.length} today ›` : "history ›"}
+          </Link>
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
           {SYMPTOMS.map((name) => {

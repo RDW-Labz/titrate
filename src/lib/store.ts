@@ -170,6 +170,9 @@ export const actions = {
     update((s) => ({ ...s, symptoms: [...s.symptoms, entry] }));
     return entry;
   },
+  updateSymptom(id: string, patch: Partial<SymptomLog>) {
+    update((s) => ({ ...s, symptoms: s.symptoms.map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+  },
   deleteSymptom(id: string) {
     update((s) => ({ ...s, symptoms: s.symptoms.filter((x) => x.id !== id) }));
   },
