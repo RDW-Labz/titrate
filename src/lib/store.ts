@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { Compound, DoseLog, Food, FoodLog, Goals, State, Vial, WeightLog } from "./types";
+import type { Compound, DoseLog, Food, FoodLog, Goals, State, SymptomLog, Vial, WeightLog } from "./types";
 import { dayKey, parseDay, suggestSite } from "./schedule";
 
 const KEY = "titrate.v1";
@@ -15,6 +15,7 @@ export const EMPTY: State = {
   doses: [],
   foods: [],
   weights: [],
+  symptoms: [],
   goals: DEFAULT_GOALS,
   favorites: [
     { name: "Greek yogurt, plain", kcal: 146, p: 25, c: 9, f: 0, fiber: 0, glp1: true },
@@ -153,6 +154,14 @@ export const actions = {
   deleteFood(id: string) {
     update((s) => ({ ...s, foods: s.foods.filter((f) => f.id !== id) }));
   },
+  logSymptom(name: string, severity: SymptomLog["severity"] = 1) {
+    const entry: SymptomLog = { id: uid(), at: new Date().toISOString(), name, severity };
+    update((s) => ({ ...s, symptoms: [...s.symptoms, entry] }));
+    return entry;
+  },
+  deleteSymptom(id: string) {
+    update((s) => ({ ...s, symptoms: s.symptoms.filter((x) => x.id !== id) }));
+  },
   addWeight(lb: number, at = new Date()) {
     update((s) => ({ ...s, weights: [...s.weights.filter((w) => w.at !== dayKey(at)), { at: dayKey(at), lb }] }));
   },
@@ -244,9 +253,16 @@ function demoState(): State {
     lb: Math.round((212 - (6 - i) * 2.4) * 10) / 10,
   }));
 
+  const symptoms: SymptomLog[] = [
+    { id: "sy1", at: iso(day(1, 21)), name: "Nausea", severity: 1 },
+    { id: "sy2", at: iso(day(3, 9)), name: "Fatigue", severity: 2 },
+    { id: "sy3", at: iso(day(6, 10)), name: "Headache", severity: 1 },
+  ];
+
   return {
     ...EMPTY,
     compounds: [tirz, bpc, ipa],
+    symptoms,
     vials: [
       {
         id: "demo-vial-bpc",

@@ -6,26 +6,8 @@ import { Btn, Field, PageTitle, Pill } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { CATEGORY_LABEL, PEPTIDE_BY_ID, PEPTIDES, halfLifeLabel } from "@/lib/peptides";
 import { actions } from "@/lib/store";
-import type { Peptide, Schedule } from "@/lib/types";
-
-type Preset = { id: string; label: string; schedule: Schedule };
-
-const SCHEDULES: Preset[] = [
-  { id: "daily", label: "Daily", schedule: { kind: "every", everyDays: 1 } },
-  { id: "eod", label: "Every other day", schedule: { kind: "every", everyDays: 2 } },
-  { id: "twice", label: "Mon + Thu", schedule: { kind: "weekly", days: [1, 4] } },
-  { id: "three", label: "Mon, Wed, Fri", schedule: { kind: "weekly", days: [1, 3, 5] } },
-  { id: "weekdays", label: "Weekdays", schedule: { kind: "weekly", days: [1, 2, 3, 4, 5] } },
-  { id: "weekly", label: "Weekly", schedule: { kind: "every", everyDays: 7 } },
-  { id: "biweekly", label: "Every 2 weeks", schedule: { kind: "every", everyDays: 14 } },
-];
-
-const CYCLES = [
-  { id: "none", label: "Continuous", cycle: undefined },
-  { id: "4-2", label: "4 wk on / 2 off", cycle: { onDays: 28, offDays: 14 } },
-  { id: "8-4", label: "8 wk on / 4 off", cycle: { onDays: 56, offDays: 28 } },
-  { id: "12-4", label: "12 wk on / 4 off", cycle: { onDays: 84, offDays: 28 } },
-];
+import type { Peptide } from "@/lib/types";
+import { CYCLES, SCHEDULES } from "@/lib/presets";
 
 /** guess the schedule and cycle from the library entry so nobody fills a form */
 function presetFor(p: Peptide) {

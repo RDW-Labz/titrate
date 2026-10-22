@@ -14,7 +14,7 @@ export default function PeptidesPage() {
   return (
     <div className="pt-3">
       <div className="enter flex items-baseline justify-between px-1">
-        <h1 className="text-[26px] font-semibold tracking-[-0.015em]">Peptides</h1>
+        <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.025em]">Peptides</h1>
         <Link href="/protocols/new" className="press text-[14px] font-semibold text-accent">
           Add
         </Link>

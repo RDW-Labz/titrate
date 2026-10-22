@@ -73,6 +73,8 @@ export type FoodLog = {
 
 export type WeightLog = { at: string; lb: number };
 
+export type SymptomLog = { id: string; at: string; name: string; severity: 1 | 2 | 3 };
+
 export type Goals = { kcal: number; p: number; c: number; f: number; fiber: number };
 
 export type Food = {
@@ -91,6 +93,7 @@ export type State = {
   doses: DoseLog[];
   foods: FoodLog[];
   weights: WeightLog[];
+  symptoms: SymptomLog[];
   goals: Goals;
   favorites: Food[];
 };

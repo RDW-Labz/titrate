@@ -5,13 +5,16 @@ import { useEffect, useState } from "react";
 import { GearIcon } from "@/components/icons";
 import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
 import { Btn, CountdownRing, Empty } from "@/components/ui";
+import { toast } from "@/components/toast";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
 import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 import { doseOn } from "@/lib/titration";
 
+const SYMPTOMS = ["Nausea", "Fatigue", "Headache", "Constipation", "Bloating"];
+
 export default function TodayPage() {
-  const { compounds, doses, foods, goals } = useStore();
+  const { compounds, doses, foods, goals, symptoms } = useStore();
   const now = new Date();
   const [flash, setFlash] = useState<string | null>(null);
 
@@ -70,6 +73,7 @@ export default function TodayPage() {
   const progress = hero?.due ? 1 : Math.min(1, Math.max(0.04, elapsed / Math.max(1, total)));
 
   const todayFood = foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now));
+  const todaySymptoms = symptoms.filter((x) => dayKey(new Date(x.at)) === dayKey(now));
   const kcal = todayFood.reduce((n, f) => n + f.kcal, 0);
   const protein = todayFood.reduce((n, f) => n + f.p, 0);
 
@@ -175,6 +179,39 @@ export default function TodayPage() {
         </div>
         <span className="num text-[12.5px] text-muted">{kcal} kcal</span>
       </Link>
+
+      <section className="enter mt-3 rounded-[22px] bg-card px-4 py-4 shadow-card" style={{ animationDelay: "250ms" }}>
+        <div className="flex items-baseline justify-between">
+          <p className="text-[15px] font-medium">Any side effects?</p>
+          <span className="num text-[12px] text-muted">
+            {todaySymptoms.length ? `${todaySymptoms.length} today` : "tap any"}
+          </span>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {SYMPTOMS.map((name) => {
+            const hit = todaySymptoms.filter((x) => x.name === name);
+            return (
+              <button
+                key={name}
+                onClick={() => {
+                  if (hit.length) hit.forEach((x) => actions.deleteSymptom(x.id));
+                  else {
+                    actions.logSymptom(name);
+                    toast(`Noted ${name.toLowerCase()}`);
+                  }
+                }}
+                aria-pressed={hit.length > 0}
+                className={`press rounded-full px-3 py-1.5 text-[13px] font-medium ${
+                  hit.length ? "bg-warn-soft text-warn" : "bg-paper text-muted"
+                }`}
+              >
+                {hit.length > 1 ? `${hit.length}× ` : ""}
+                {name}
+              </button>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { levelNow, levelWindow, levelWord } from "@/lib/levels";
 import { dayKey, cycleInfo, humanIn, isDueOn, nextDue } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 import { doseOn, nextStep } from "@/lib/titration";
+import { CYCLES, SCHEDULES, cyclePresetId, schedulePresetId } from "@/lib/presets";
 import { budDaysLeft, scheduleLabel, useByDate, vialStatus } from "@/lib/vial";
 
 const localInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
@@ -195,6 +196,53 @@ export default function ProtocolDetailPage() {
               </Btn>
             </div>
           </details>
+        </div>
+
+        <div className="mt-4 border-t border-line pt-4">
+          <p className="text-[13.5px] font-semibold">Schedule</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Field label="How often">
+              <select
+                value={schedulePresetId(compound.schedule)}
+                onChange={(e) => {
+                  const preset = SCHEDULES.find((p) => p.id === e.target.value);
+                  if (preset) {
+                    actions.updateCompound(compound.id, { schedule: preset.schedule });
+                    toast(`Now ${preset.label.toLowerCase()}`);
+                  }
+                }}
+              >
+                {SCHEDULES.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+                {schedulePresetId(compound.schedule) === "custom" ? <option value="custom">Custom</option> : null}
+              </select>
+            </Field>
+            <Field label="Cycle">
+              <select
+                value={cyclePresetId(compound.cycle)}
+                onChange={(e) => {
+                  const preset = CYCLES.find((c) => c.id === e.target.value);
+                  if (preset) {
+                    actions.updateCompound(compound.id, { cycle: preset.cycle });
+                    toast(preset.cycle ? "Cycle set" : "Continuous");
+                  }
+                }}
+              >
+                {CYCLES.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
+                ))}
+                {cyclePresetId(compound.cycle) === "custom" ? <option value="custom">Custom</option> : null}
+              </select>
+            </Field>
+          </div>
+          <p className="mt-1.5 text-[12px] text-muted">
+            Changing this re-dates what's due from today; logged doses stay.
+          </p>
         </div>
 
         <div className="mt-4 border-t border-line pt-4">
