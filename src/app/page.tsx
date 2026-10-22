@@ -1,277 +1,135 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { LogDoseButton } from "@/components/log-dose";
-import { LevelChart } from "@/components/level-chart";
-import { Btn, Card, Empty, LinkBtn, Pill, Ring, SectionHead, Stat } from "@/components/ui";
-import { levelNow, levelWindow, levelWord } from "@/lib/levels";
+import { useEffect, useState } from "react";
+import { LogDoseButton, LogDot } from "@/components/log-dose";
+import { Btn, Empty } from "@/components/ui";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
-import { cycleInfo, dayKey, daysBetween, humanIn, isDueOn, nextDue, streak } from "@/lib/schedule";
+import { dayKey, humanIn, isDueOn, lastDose, nextDue } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
-import type { Compound } from "@/lib/types";
 
 export default function TodayPage() {
-  const { compounds, doses, foods, goals, weights } = useStore();
+  const { compounds, doses, foods, goals } = useStore();
   const now = new Date();
+  const [flash, setFlash] = useState<string | null>(null);
 
-  const rows = useMemo(() => {
-    return compounds
-      .map((c) => ({ c, due: isDueOn(c, doses, now), next: nextDue(c, doses, now) }))
-      .sort((a, b) => {
-        if (a.due !== b.due) return a.due ? -1 : 1;
-        return (a.next?.getTime() ?? Infinity) - (b.next?.getTime() ?? Infinity);
-      });
-  }, [compounds, doses, now]);
-
-  const hero = rows[0];
-  const rest = rows.slice(1);
-  const dues = rows.filter((r) => r.due);
-  const loggedToday = doses.filter((d) => dayKey(new Date(d.at)) === dayKey(now) && !d.skipped).length;
-
-  const todayFood = foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now));
-  const kcal = todayFood.reduce((n, f) => n + f.kcal, 0);
-  const protein = todayFood.reduce((n, f) => n + f.p, 0);
-  const latestWeight = [...weights].sort((a, b) => b.at.localeCompare(a.at))[0];
-  const weightDelta = latestWeight
-    ? Math.round((latestWeight.lb - weights[weights.length - 1].lb) * 10) / 10
-    : null;
+  useEffect(() => {
+    if (!flash) return;
+    const t = setTimeout(() => setFlash(null), 1900);
+    return () => clearTimeout(t);
+  }, [flash]);
 
   if (compounds.length === 0) {
     return (
-      <div className="pt-3">
-        <Wordmark />
-        <Empty
-          title="Nothing tracked yet"
-          body="Add a compound and this screen becomes your day: what's due, what's in your system, and what you've eaten."
-        >
-          <LinkBtn href="/protocols/new" variant="primary">
-            Add a compound
-          </LinkBtn>
-          <Btn variant="line" onClick={() => actions.seed()}>
-            Load a sample protocol
-          </Btn>
-        </Empty>
-        <SectionHead>What this tracks</SectionHead>
-        <Card className="divide-y divide-line">
-          {[
-            ["Doses and cycles", "Every compound, its schedule, and where you are in the on/off cycle."],
-            ["Reconstitution", "mg + mL of water to syringe units, per vial. Doses left counts down."],
-            ["Level curves", "Estimated compound level from half-life and every dose you've logged."],
-            ["Nutrition", "Protein and calories on GLP-1s, where they decide whether you keep muscle."],
-          ].map(([title, body]) => (
-            <div key={title} className="px-4 py-3">
-              <p className="text-[14px] font-medium">{title}</p>
-              <p className="mt-0.5 text-[13px] text-muted">{body}</p>
-            </div>
-          ))}
-        </Card>
+      <div className="pt-4">
+        <h1 className="px-1 text-[26px] font-semibold tracking-[-0.015em]">Today</h1>
+        <div className="mt-4">
+          <Empty title="Let's track something" body="Add a peptide and this screen becomes one big button: what's due, tap, done.">
+            <Link
+              href="/protocols/new"
+              className="press rounded-2xl bg-accent px-4 py-3.5 text-[16px] font-semibold text-white"
+            >
+              Add a peptide
+            </Link>
+            <Btn variant="line" onClick={() => actions.seed()}>
+              Show me a sample
+            </Btn>
+          </Empty>
+        </div>
       </div>
     );
   }
 
+  const rows = compounds.map((c) => ({ c, due: isDueOn(c, doses, now), next: nextDue(c, doses, now) }));
+  const dueRows = rows.filter((r) => r.due);
+  const hero = rows.find((r) => r.c.id === flash) ?? dueRows[0] ?? rows.sort((a, b) => (a.next?.getTime() ?? 9e15) - (b.next?.getTime() ?? 9e15))[0];
+  const others = rows.filter((r) => r.c.id !== hero?.c.id);
+  const peptide = hero ? PEPTIDE_BY_ID.get(hero.c.peptideId) : undefined;
+  const last = hero ? lastDose(doses, hero.c.id) : undefined;
+
+  const todayFood = foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now));
+  const kcal = todayFood.reduce((n, f) => n + f.kcal, 0);
+  const protein = todayFood.reduce((n, f) => n + f.p, 0);
+
   return (
-    <div>
-      <Wordmark />
-      <div className="flex items-end justify-between px-1 pb-3">
-        <div>
-          <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.01em]">
-            {now.toLocaleDateString(undefined, { weekday: "long" })}
-          </h1>
-          <p className="num text-[12.5px] text-muted">
-            {now.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+    <div className="pt-3">
+      <div className="enter flex items-baseline justify-between px-1">
+        <h1 className="text-[26px] font-semibold tracking-[-0.015em]">Today</h1>
+        <span className="text-[13px] text-muted">
+          {now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+        </span>
+      </div>
+
+      {hero ? (
+        <section
+          key={hero.c.id}
+          className="enter mt-3 rounded-[26px] bg-ink px-5 py-5 text-white"
+          style={{ animationDelay: "40ms" }}
+        >
+          <p className="text-[13px] font-medium text-white/55">{hero.due ? "Due now" : "Next up"}</p>
+          <div className="mt-1 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-[30px] leading-[1.1] font-semibold tracking-[-0.02em]">{hero.c.name}</h2>
+              <p className="num mt-1 text-[14px] text-white/65">
+                {hero.c.dose} {hero.c.unit} · {peptide?.frequency ?? "custom"}
+              </p>
+            </div>
+            <p className="num shrink-0 pt-1 text-[15px] text-white/80">
+              {hero.due ? "now" : hero.next ? humanIn(hero.next, now) : "—"}
+            </p>
+          </div>
+
+          <div className="mt-5">
+            <LogDoseButton
+              compound={hero.c}
+              className="w-full !rounded-2xl !bg-white !py-4 !text-[17px] !text-ink hover:!brightness-95"
+              onLogged={() => setFlash(hero.c.id)}
+            />
+          </div>
+          <p className="mt-2.5 text-[12.5px] text-white/45">
+            {last ? `Last ${humanIn(new Date(last.at), now)}${last.site ? ` · ${last.site}` : ""}` : "First dose"}
           </p>
-        </div>
-        <Pill tone={streak(doses, now) > 0 ? "accent" : "neutral"}>
-          {streak(doses, now)} day streak · {loggedToday} logged
-        </Pill>
-      </div>
-
-      {hero ? <Hero row={hero} now={now} dues={dues.length} all={compounds} /> : null}
-
-      <div className="mt-3 flex gap-2">
-        <LinkBtn href="/calc" variant="line" className="flex-1">
-          Reconstitute a vial
-        </LinkBtn>
-        <LinkBtn href="/protocols" variant="line" className="flex-1">
-          All protocols
-        </LinkBtn>
-      </div>
-
-      {rest.length > 0 ? (
-        <>
-          <SectionHead right={<Link href="/protocols" className="text-[12.5px] text-accent">Manage</Link>}>
-            {dues.length > 1 ? "Also due today" : "Up next"}
-          </SectionHead>
-          <Card className="divide-y divide-line">
-            {rest.map(({ c, next }) => {
-              const due = isDueOn(c, doses, now);
-              return (
-                <div key={c.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
-                    <p className="truncate text-[14.5px] font-medium">{c.name}</p>
-                    <p className="num text-[12px] text-muted">
-                      {c.dose} {c.unit} · {next ? (due ? "due today" : `due ${humanIn(next, now)}`) : "off cycle"}
-                    </p>
-                  </Link>
-                  {due ? (
-                    <LogDoseButton compound={c} size="sm" />
-                  ) : (
-                    <Pill tone="neutral">{next ? humanIn(next, now) : "off"}</Pill>
-                  )}
-                </div>
-              );
-            })}
-          </Card>
-        </>
+        </section>
       ) : null}
 
-      <SectionHead>Estimated levels</SectionHead>
-      <Card className="divide-y divide-line">
-        {compounds.map((c) => {
-          const values = levelWindow(doses, c, now, 7, 1);
-          const current = levelNow(doses, c, now);
-          const peptide = PEPTIDE_BY_ID.get(c.peptideId);
-          return (
-            <Link key={c.id} href={`/protocols/${c.id}`} className="block px-4 py-3">
-              <div className="flex items-baseline justify-between">
-                <span className="text-[14px] font-medium">{c.name}</span>
-                <span className="num text-[12.5px]">
-                  {Math.round(current)}% <span className="text-muted">{levelWord(current)}</span>
-                </span>
-              </div>
-              <LevelChart values={values} height={40} />
-              <p className="num text-[11px] text-muted">
-                t½ {peptide ? peptide.halfLifeH : 6}h · % of one dose peak · last 7 days
-              </p>
-            </Link>
-          );
-        })}
-      </Card>
+      {others.length > 0 ? (
+        <ul className="mt-3 space-y-2">
+          {others.map(({ c, due, next }, i) => (
+            <li
+              key={c.id}
+              className="enter flex items-center gap-3 rounded-2xl bg-card px-4 py-3"
+              style={{ animationDelay: `${80 + i * 45}ms` }}
+            >
+              <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
+                <p className="truncate text-[16px] font-medium">{c.name}</p>
+                <p className="num text-[13px] text-muted">
+                  {c.dose} {c.unit} · {due ? "due today" : next ? humanIn(next, now) : "off cycle"}
+                </p>
+              </Link>
+              {due ? <LogDot compound={c} /> : <span className="pr-1 text-[18px] text-muted">›</span>}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
-      <SectionHead right={<Link href="/food" className="text-[12.5px] text-accent">Log food</Link>}>
-        Today
-      </SectionHead>
-      <Card className="px-4 py-4">
-        <div className="flex items-start justify-between gap-2">
-          <Ring value={kcal} max={goals.kcal} label="kcal" />
-          <Ring value={protein} max={goals.p} label="protein" />
-          <Ring value={todayFood.reduce((n, f) => n + f.fiber, 0)} max={goals.fiber} label="fiber" />
-          <div className="flex-1 text-right">
-            <Stat
-              label="Weight"
-              value={latestWeight ? `${latestWeight.lb} lb` : "—"}
-              sub={weightDelta === null ? undefined : `${weightDelta > 0 ? "+" : ""}${weightDelta} lb total`}
+      <Link
+        href="/food"
+        className="enter press mt-3 flex items-center gap-3 rounded-2xl bg-card px-4 py-3.5"
+        style={{ animationDelay: "160ms" }}
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px] font-medium">
+            {protein} g protein <span className="text-muted">of {goals.p}</span>
+          </p>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-700"
+              style={{ width: `${Math.min(100, (protein / Math.max(1, goals.p)) * 100)}%` }}
             />
           </div>
         </div>
-        {todayFood.length === 0 ? (
-          <p className="mt-3 text-[12.5px] text-muted">
-            Nothing logged today. Protein first on a GLP-1 — {Math.max(0, goals.p - protein)} g to go.
-          </p>
-        ) : null}
-      </Card>
-
-      <div className="mt-6 flex items-center justify-between px-1 text-[11.5px] text-muted">
-        <Link href="/studio" className="text-muted underline underline-offset-2">
-          Card studio (OpenUI)
-        </Link>
-        <button
-          className="underline underline-offset-2"
-          onClick={() => {
-            if (confirm("Clear every compound, dose and food log on this device?")) actions.reset();
-          }}
-        >
-          Clear data
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Wordmark() {
-  return (
-    <div className="flex items-center justify-between pt-4 pb-1">
-      <Link href="/" className="flex items-baseline gap-2">
-        <span className="text-[15px] font-semibold tracking-[-0.02em]">Titrate</span>
-        <span className="text-[11px] text-muted">peptide protocol tracker</span>
+        <span className="num text-[13px] text-muted">{kcal} kcal</span>
       </Link>
     </div>
-  );
-}
-
-function Hero({
-  row,
-  now,
-  dues,
-  all,
-}: {
-  row: { c: Compound; due: boolean; next: Date | null };
-  now: Date;
-  dues: number;
-  all: Compound[];
-}) {
-  const { doses } = useStore();
-  const { c, due, next } = row;
-  const peptide = PEPTIDE_BY_ID.get(c.peptideId);
-  const cycle = cycleInfo(c, now);
-  const last = doses
-    .filter((d) => d.compoundId === c.id && !d.skipped)
-    .sort((a, b) => +new Date(b.at) - +new Date(a.at))[0];
-  const sinceLast = last ? daysBetween(new Date(last.at), now) : null;
-
-  return (
-    <Card as="section" className="overflow-hidden border-ink bg-ink text-white">
-      <div className="px-4 pt-3.5 pb-4">
-        <div className="flex items-center justify-between">
-          <span className="text-[12px] font-medium text-white/65">{due ? "Due now" : "Next dose"}</span>
-          <span className="num text-[11.5px] text-white/60">
-            {all.length} compound{all.length === 1 ? "" : "s"}
-            {dues > 1 ? ` · ${dues} due` : ""}
-          </span>
-        </div>
-        <div className="mt-2 flex items-end justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="truncate text-[24px] leading-tight font-semibold tracking-[-0.01em]">{c.name}</h2>
-            <p className="num mt-0.5 text-[13px] text-white/70">
-              {c.dose} {c.unit} · {peptide?.frequency ?? "custom schedule"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="num text-[26px] leading-none font-medium">{due ? "Now" : next ? humanIn(next, now).replace("in ", "") : "—"}</p>
-            <p className="num text-[11px] text-white/60">{cycle ? `cycle d${cycle.day}` : "\u00a0"}</p>
-          </div>
-        </div>
-        {cycle ? (
-          <div className="mt-3">
-            <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
-              <div
-                className="h-full bg-white/80"
-                style={{ width: `${Math.min(100, (cycle.dayInPhase / cycle.phaseLength) * 100)}%` }}
-              />
-            </div>
-            <p className="num mt-1 text-[11px] text-white/60">
-              {cycle.phase === "on" ? "on" : "off"} · day {cycle.dayInPhase} of {cycle.phaseLength} ·{" "}
-              {cycle.daysLeftInPhase} to {cycle.phase === "on" ? "off period" : "on period"}
-            </p>
-          </div>
-        ) : null}
-        <div className="mt-4 flex items-center gap-2">
-          <LogDoseButton compound={c} className="flex-1 !bg-white !text-ink hover:!brightness-95" />
-          <Link
-            href={`/protocols/${c.id}`}
-            className="rounded-lg border border-white/25 px-3 py-2.5 text-[13px] font-medium text-white/90"
-          >
-            Details
-          </Link>
-        </div>
-        {sinceLast !== null ? (
-          <p className="mt-2 text-[11.5px] text-white/50">
-            Last logged {sinceLast === 0 ? "today" : `${sinceLast} day${sinceLast === 1 ? "" : "s"} ago`}
-            {last?.site ? ` · ${last.site}` : ""}
-          </p>
-        ) : null}
-      </div>
-    </Card>
   );
 }
