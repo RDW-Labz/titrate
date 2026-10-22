@@ -23,20 +23,6 @@ export function levelNow(doses: DoseLog[], c: Compound, now: Date): number {
   return levelAt(dosesFor(doses, c.id), +now, halfLifeH, tmaxH) * toPercent(c);
 }
 
-/** levels across a window; 100 = the peak of one dose */
-export function levelWindow(
-  doses: DoseLog[],
-  c: Compound,
-  now: Date,
-  daysBack = 7,
-  daysForward = 1,
-): number[] {
-  const { halfLifeH, tmaxH } = halfLifeOf(c);
-  const from = +now - daysBack * 86_400_000;
-  const to = +now + daysForward * 86_400_000;
-  return curve(dosesFor(doses, c.id), halfLifeH, tmaxH, from, to, 80).map((v) => v * toPercent(c));
-}
-
 export function levelWord(pct: number): string {
   if (pct < 5) return "cleared";
   if (pct < 35) return "trough";

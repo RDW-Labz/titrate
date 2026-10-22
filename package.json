@@ -11,8 +11,6 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@openuidev/lang-core": "1.0.1",
-    "@openuidev/react-lang": "1.0.1",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",

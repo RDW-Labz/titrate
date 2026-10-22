@@ -71,7 +71,6 @@ export default function PeptidesPage() {
     { href: "/library", label: "Library", hint: "20 compounds" },
     { href: "/summary", label: "Summary", hint: "for a clinician" },
     { href: "/settings", label: "Settings", hint: "reminders, backup" },
-    { href: "/studio", label: "Studio", hint: "OpenUI cards" },
   ].filter((p) => query && (p.label.toLowerCase().includes(query) || p.hint.includes(query)));
 
   const libraryHits = query

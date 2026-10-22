@@ -10,7 +10,6 @@ pnpm test     # 20 checks: reconstitution, PK, schedule, cycles, projection
 pnpm build
 ```
 
-
 ## Screens
 
 | Route | Job |
@@ -26,7 +25,6 @@ pnpm build
 | `/summary` | Printable / copyable protocol summary for a clinician |
 | `/symptoms` | Side effects over the last 30 days, severity editable, delete |
 | `/settings` | Reminders, JSON backup, doses CSV, restore, reset, install hint |
-| `/studio` | OpenUI card renderer (dev surface) |
 
 ## What works
 
@@ -43,14 +41,12 @@ pnpm build
   grouped by day with severity dots.
 - **Offline** — a service worker caches the shell and build assets, so the installed app opens with no
   network. Reminders still need the app open (no push server).
-- **OpenUI card studio** (`/studio`) — 3 house components render model-written OpenUI Lang.
 
 ## Deliberately not built yet
 
 - No accounts, sync or server DB (single device).
 - No Health/Apple integration, no home-screen widget — both need a native shell.
 - No barcode/photo food database; foods are manual + favourites.
-- No assistant chat yet: `/studio` proves the render half, the model call is the next step.
 
 ## Deploy
 
