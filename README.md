@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Titrate — peptide protocol tracker
 
-## Getting Started
-
-First, run the development server:
+Mobile-first tracker for peptides and GLP-1s. Runs locally, no accounts, no server: all data lives in
+`localStorage` under `titrate.v1`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev      # http://localhost:3000 (or 3001 if 3000 is taken)
+pnpm test     # PK + reconstitution + schedule self-checks
+pnpm build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## What works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Dose + cycle tracking** — per compound: dose, schedule (every N days or Mon/Thu style), on/off
+  cycle with a progress bar, one-tap logging with auto site rotation, dose history, titration.
+- **Reconstitution** — vial mg + water mL → concentration → syringe units (U-100 0.3/0.5/1 mL, U-40),
+  doses per vial, capacity warning. Saving a vial makes it count down as you log doses.
+- **Estimated level curves** — one-compartment model with first-order absorption, superposition over
+  every logged dose, half-life per compound. Shown as % of a single dose peak.
+- **Nutrition** — calories/protein/fiber/carbs/fat against targets, quick-add favourites, custom foods,
+  weight log. Protein-forward because that is what GLP-1 users actually need to watch.
+- **GLP-1s + peptides** — 20 compounds with half-life, peak, common ranges, cycle convention.
+- **OpenUI card studio** (`/studio`) — 3 house components render model-written OpenUI Lang.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deliberately not built yet
 
-## Learn More
+- No accounts, sync or server DB (single device).
+- No Health/Apple integration, no home-screen widget — both need a native shell.
+- No barcode/photo food database; foods are manual + favourites.
+- No assistant chat yet: `/studio` proves the render half, the model call is the next step.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Reference values are published pharmacology for tracking only — the app does not recommend doses.

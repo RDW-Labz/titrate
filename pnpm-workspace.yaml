@@ -1,3 +1,5 @@
+packages:
+  - '.'
 allowBuilds:
-  sharp: false
+  '@openuidev/lang-core': false
   unrs-resolver: false
