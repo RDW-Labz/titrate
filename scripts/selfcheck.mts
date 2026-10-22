@@ -4,6 +4,7 @@ import { reconstitute, unitsForDose, formatUnits, waterToFit } from "../src/lib/
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
 import { levelSeries, levelWord, levelNow } from "../src/lib/levels.ts";
 import { dosesIcs } from "../src/lib/ics.ts";
+import { parseLine, toLang } from "../src/lib/intent.ts";
 import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
@@ -209,4 +210,37 @@ test("waterToFit catches the too-big draw and the direction of the fix", () => {
   // less water than the original, not more
   assert.ok(water < 2);
   assert.equal(waterToFit({ vialMg: 0, doseMcg: 5000, unitsPerMl: 100, maxUnits: 50 }), null);
+});
+
+test("a typed line becomes a log card with the peptide, dose, time and site", () => {
+  const now = new Date(2026, 0, 10, 20);
+  const mine = [compound({ id: "c-bpc", peptideId: "bpc-157", name: "BPC-157" })];
+  const line = parseLine("250 mcg BPC this morning, left thigh", mine, now)!;
+  assert.equal(line.kind, "log");
+  if (line.kind !== "log") return;
+  assert.equal(line.peptide, "BPC-157");
+  assert.equal(line.dose, 250);
+  assert.equal(line.unit, "mcg");
+  assert.equal(line.when, "this morning");
+  assert.equal(line.site, "Left thigh");
+  assert.equal(line.at.getHours(), 9);
+  assert.equal(line.compoundId, "c-bpc");
+  assert.match(toLang(line), /^root = LogCard\("BPC-157", 250, "mcg", "this morning", "Left thigh"\)$/);
+});
+
+test("levels and mixing get their own cards, and junk gets nothing", () => {
+  const mine = [compound({ id: "c-tirz", peptideId: "tirzepatide", name: "Tirzepatide", dose: 2500 })];
+  const level = parseLine("how much tirz is in me", mine)!;
+  assert.equal(level.kind, "level");
+  assert.match(toLang(level, { percent: 122, word: "near peak", nextIn: "next in 4 days" }), /^root = LevelCard\("Tirzepatide", 122, "near peak"/);
+
+  const recon = parseLine("5 mg in 2 ml for 250 mcg", mine)!;
+  assert.equal(recon.kind, "recon");
+  if (recon.kind !== "recon") return;
+  assert.equal(recon.vialMg, 5);
+  assert.equal(recon.waterMl, 2);
+  assert.equal(recon.dose, 250);
+
+  assert.equal(parseLine("hello", mine), null);
+  assert.equal(parseLine("250 mcg", mine), null, "no peptide named");
 });

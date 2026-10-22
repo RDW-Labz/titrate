@@ -69,6 +69,7 @@ export default function PeptidesPage() {
     { href: "/calc", label: "Calc", hint: "reconstitution" },
     { href: "/food", label: "Food", hint: "nutrition & weight" },
     { href: "/library", label: "Library", hint: "20 compounds" },
+    { href: "/assistant", label: "Type it", hint: "log a dose in words" },
     { href: "/summary", label: "Summary", hint: "for a clinician" },
     { href: "/settings", label: "Settings", hint: "reminders, backup" },
   ].filter((p) => query && (p.label.toLowerCase().includes(query) || p.hint.includes(query)));

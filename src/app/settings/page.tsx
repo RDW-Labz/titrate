@@ -186,6 +186,18 @@ export default function SettingsPage() {
       <section className="mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
         <div className="flex items-center justify-between gap-3">
           <div>
+            <p className="text-[15px] font-semibold">Type it</p>
+            <p className="mt-1 text-[12px] text-muted">Log a dose in a sentence instead of tapping through fields.</p>
+          </div>
+          <Link href="/assistant" className="press shrink-0 rounded-xl bg-accent-soft px-3 py-2 text-[13.5px] font-semibold text-accent">
+            Open
+          </Link>
+        </div>
+      </section>
+
+      <section className="mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
+        <div className="flex items-center justify-between gap-3">
+          <div>
             <p className="text-[15px] font-semibold">Summary</p>
             <p className="mt-1 text-[12px] text-muted">A one-page view of your protocol to print or show a doctor.</p>
           </div>
