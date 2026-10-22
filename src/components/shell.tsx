@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
-import { BookIcon, CalcIcon, ForkIcon, HomeIcon, VialIcon } from "./icons";
+import { BookIcon, ForkIcon, HomeIcon, SyringeIcon, VialIcon } from "./icons";
 import { ToastHost } from "./toast";
 import { PageFade } from "./page-fade";
 import { Reminders } from "./reminders";
@@ -12,7 +12,7 @@ import { useReady } from "@/lib/store";
 const TABS = [
   { href: "/", label: "Today", Icon: HomeIcon },
   { href: "/protocols", label: "Peptides", Icon: VialIcon },
-  { href: "/calc", label: "Calc", Icon: CalcIcon },
+  { href: "/calc", label: "Calc", Icon: SyringeIcon },
   { href: "/food", label: "Food", Icon: ForkIcon },
   { href: "/library", label: "Library", Icon: BookIcon },
 ] as const;

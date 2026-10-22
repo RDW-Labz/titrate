@@ -25,6 +25,7 @@ export default function ProtocolDetailPage() {
   const now = new Date();
   const [doseDraft, setDoseDraft] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
+  const [editingDose, setEditingDose] = useState<string | null>(null);
   const [stepDate, setStepDate] = useState("");
   const [stepDose, setStepDose] = useState("");
 
@@ -298,9 +299,32 @@ export default function ProtocolDetailPage() {
                             {at.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
                           </span>
                         </button>
-                        <span className="num text-[13px]">
-                          {d.dose} {d.unit}
-                        </span>
+                        {editingDose === d.id ? (
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            autoFocus
+                            defaultValue={d.dose}
+                            aria-label={`Dose amount for ${dayKey(at)}`}
+                            className="plaininput w-[76px] px-2 py-1 text-right text-[13px]"
+                            onBlur={(e) => {
+                              const v = Number(e.target.value);
+                              if (v > 0) actions.updateDose(d.id, { dose: v });
+                              setEditingDose(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                            }}
+                          />
+                        ) : (
+                          <button
+                            onClick={() => setEditingDose(d.id)}
+                            className="press num min-h-[38px] text-[13px]"
+                            aria-label={`Edit amount for dose on ${dayKey(at)}`}
+                          >
+                            {d.dose} {d.unit}
+                          </button>
+                        )}
                         <button
                           aria-label={`Delete dose ${dayKey(at)}`}
                           className="press grid size-9 place-items-center text-[13px] text-muted"

@@ -1,70 +1,75 @@
 type IconProps = { className?: string };
 
-const base = "size-[22px]";
-
 function S({ children, className }: IconProps & { children: React.ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.7"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className={`${base} ${className ?? ""}`}
+      className={`size-[22px] ${className ?? ""}`}
     >
       {children}
     </svg>
   );
 }
 
+/** Today */
 export function HomeIcon(p: IconProps) {
   return (
     <S {...p}>
-      <path d="M4 10.5 12 4l8 6.5" />
-      <path d="M6 9.8V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.8" />
-      <path d="M10 20v-5h4v5" />
+      <path d="M3.8 10.4 12 3.6l8.2 6.8v8.5c0 .8-.6 1.4-1.4 1.4H5.2c-.8 0-1.4-.6-1.4-1.4z" />
+      <path d="M9.5 20.3v-5.2h5v5.2" />
     </S>
   );
 }
 
+/** Peptides — a capped vial */
 export function VialIcon(p: IconProps) {
   return (
     <S {...p}>
-      <path d="M9 3h6" />
-      <path d="M10 3v13a2 2 0 0 0 4 0V3" />
-      <path d="M10 10h4" />
-      <path d="M8 21h8" />
+      <path d="M9.4 2.8h5.2v2.6H9.4z" />
+      <path d="M8.5 5.4h7v12.1a3.5 3.5 0 0 1-7 0z" />
+      <path d="M8.5 11.6h7" />
+      <path d="M7 21.2h10" />
     </S>
   );
 }
 
-export function CalcIcon(p: IconProps) {
+/** Calc — a syringe (reconstitution) */
+export function SyringeIcon(p: IconProps) {
   return (
     <S {...p}>
-      <rect x="5" y="3" width="14" height="18" rx="3" />
-      <path d="M8.5 7.5h7" />
-      <path d="M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01" />
+      <path d="M12.4 4.6 19.4 11.6 11 20 4 13z" />
+      <path d="M11.2 3.4 20.6 12.8" />
+      <path d="M8.6 9.4l2 2" />
+      <path d="M6.4 11.6l2 2" />
+      <path d="M3.4 20.6l2.2-2.2" />
     </S>
   );
 }
 
+/** Food */
 export function ForkIcon(p: IconProps) {
   return (
     <S {...p}>
-      <path d="M7 3v7a2.5 2.5 0 0 0 5 0V3" />
-      <path d="M9.5 12.5V21" />
-      <path d="M16.5 3c-1.4 1.6-2 3.6-2 5.6 0 1.7.7 2.9 2 3.4V21" />
+      <path d="M8 3v6.2a2.2 2.2 0 0 0 4.4 0V3" />
+      <path d="M10.2 3v6.2" />
+      <path d="M10.2 11.4V21" />
+      <path d="M17.4 3c-1.6 1.6-2.3 3.7-2.3 5.8 0 1.8.8 3 2.3 3.5V21" />
     </S>
   );
 }
 
+/** Library */
 export function BookIcon(p: IconProps) {
   return (
     <S {...p}>
-      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z" />
-      <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19v5H6.5A2.5 2.5 0 0 1 4 18.5z" />
+      <path d="M4 5.6A2.6 2.6 0 0 1 6.6 3H20v14H6.6A2.6 2.6 0 0 0 4 19.6z" />
+      <path d="M4 19.6A2.6 2.6 0 0 1 6.6 17H20v4H6.6A2.6 2.6 0 0 1 4 19.6z" />
     </S>
   );
 }
@@ -72,7 +77,7 @@ export function BookIcon(p: IconProps) {
 export function GearIcon(p: IconProps) {
   return (
     <S {...p}>
-      <circle cx="12" cy="12" r="3.2" />
+      <circle cx="12" cy="12" r="3.1" />
       <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
     </S>
   );
