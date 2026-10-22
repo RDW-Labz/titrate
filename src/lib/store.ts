@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { Compound, DoseLog, Food, FoodLog, Goals, State, SymptomLog, Vial, WeightLog } from "./types.ts";
+import type { Compound, DoseLog, Food, FoodLog, Goals, State, SymptomLog, Vial, WaterLog, WeightLog } from "./types.ts";
 import { dayKey, parseDay, suggestSite } from "./schedule.ts";
 
 const KEY = "titrate.v1";
@@ -16,6 +16,7 @@ export const EMPTY: State = {
   foods: [],
   weights: [],
   symptoms: [],
+  waters: [],
   goals: DEFAULT_GOALS,
   favorites: [
     { name: "Greek yogurt, plain", kcal: 146, p: 25, c: 9, f: 0, fiber: 0, glp1: true },
@@ -175,6 +176,14 @@ export const actions = {
   },
   deleteSymptom(id: string) {
     update((s) => ({ ...s, symptoms: s.symptoms.filter((x) => x.id !== id) }));
+  },
+  addWater(ml: number, at = new Date()) {
+    const entry: WaterLog = { id: uid(), at: at.toISOString(), ml };
+    update((s) => ({ ...s, waters: [...s.waters, entry] }));
+    return entry.id;
+  },
+  deleteWater(id: string) {
+    update((s) => ({ ...s, waters: s.waters.filter((w) => w.id !== id) }));
   },
   addWeight(lb: number, at = new Date()) {
     update((s) => ({ ...s, weights: [...s.weights.filter((w) => w.at !== dayKey(at)), { at: dayKey(at), lb }] }));

@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { Btn, Field, PageTitle, Ring } from "@/components/ui";
+import { toast } from "@/components/toast";
 import { Disclosure } from "@/components/disclosure";
 import { addDays, dayKey } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
@@ -46,7 +47,7 @@ function Trend({ values }: { values: number[] }) {
 }
 
 export default function FoodPage() {
-  const { foods, goals, favorites, weights } = useStore();
+  const { foods, goals, favorites, weights, waters } = useStore();
   const now = new Date();
   const [back, setBack] = useState(0);
   const [draft, setDraft] = useState(BLANK);
@@ -67,6 +68,11 @@ export default function FoodPage() {
   const kcal = dayFood.reduce((n, f) => n + f.kcal, 0);
   const protein = dayFood.reduce((n, f) => n + f.p, 0);
   const fiber = dayFood.reduce((n, f) => n + f.fiber, 0);
+  // shortcut: 250 mL glasses against a fixed 8-glass goal; add a goal field when someone asks
+  const GLASS = 250;
+  const dayWater = waters.filter((w) => dayKey(new Date(w.at)) === key);
+  const ml = dayWater.reduce((n, w) => n + w.ml, 0);
+  const glasses = Math.floor(ml / GLASS);
   const sorted = [...weights].sort((a, b) => a.at.localeCompare(b.at));
   const latest = sorted[sorted.length - 1];
 
@@ -104,6 +110,26 @@ export default function FoodPage() {
         <p className="mt-2 text-center text-[13px] text-muted">
           {protein >= goals.p ? "Protein done." : `${Math.max(0, goals.p - protein)} g of protein left`}
         </p>
+
+        <div className="mt-3 border-t border-line pt-3">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={() => {
+                const id = actions.addWater(GLASS, at());
+                toast(`+${GLASS} mL`, { label: "Undo", run: () => actions.deleteWater(id) });
+              }}
+              className="press flex items-center gap-2 text-[13px] text-muted"
+            >
+              Water <span className="num font-medium text-ink">{(ml / 1000).toFixed(2)} L</span>
+              <span className="text-[11px] text-accent">+{GLASS} mL</span>
+            </button>
+            <span className="flex gap-1" aria-label={`${glasses} of 8 glasses`}>
+              {Array.from({ length: 8 }, (_, i) => (
+                <span key={i} className={`size-1.5 rounded-full ${i < glasses ? "bg-accent" : "bg-line"}`} />
+              ))}
+            </span>
+          </div>
+        </div>
 
         <div className="mt-3 border-t border-line pt-3">
           {weightOpen ? (
