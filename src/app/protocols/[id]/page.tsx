@@ -30,6 +30,7 @@ export default function ProtocolDetailPage() {
   const [stepDose, setStepDose] = useState("");
   const [missedAt, setMissedAt] = useState("");
   const [missedDose, setMissedDose] = useState("");
+  const [allHistory, setAllHistory] = useState(false);
 
   const compound = compounds.find((c) => c.id === id);
   if (!compound) {
@@ -288,7 +289,7 @@ export default function ProtocolDetailPage() {
             {history.length === 0 ? (
               <li className="py-2 text-[12.5px] text-muted">Nothing logged yet.</li>
             ) : (
-              history.map((d) => {
+              (allHistory ? history : history.slice(0, 5)).map((d) => {
                 const at = new Date(d.at);
                 return (
                   <li key={d.id} className="py-1.5">
@@ -366,6 +367,14 @@ export default function ProtocolDetailPage() {
               })
             )}
           </ul>
+          {history.length > 5 ? (
+            <button
+              onClick={() => setAllHistory(!allHistory)}
+              className="press mt-1 w-full py-2 text-center text-[13px] font-medium text-accent"
+            >
+              {allHistory ? "Show fewer" : `All ${history.length} doses`}
+            </button>
+          ) : null}
         </div>
 
         <div className="mt-4 flex gap-2">
