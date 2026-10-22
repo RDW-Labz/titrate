@@ -208,7 +208,7 @@ export default function ProtocolDetailPage() {
                   const preset = SCHEDULES.find((p) => p.id === e.target.value);
                   if (preset) {
                     actions.updateCompound(compound.id, { schedule: preset.schedule });
-                    toast(`Now ${preset.label.toLowerCase()}`);
+                    toast(`Now: ${preset.label}`);
                   }
                 }}
               >
