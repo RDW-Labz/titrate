@@ -1,4 +1,4 @@
-import type { Compound, DoseLog } from "./types";
+import type { Compound, DoseLog } from "./types.ts";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

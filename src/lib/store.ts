@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { Compound, DoseLog, Food, FoodLog, Goals, State, SymptomLog, Vial, WeightLog } from "./types";
-import { dayKey, parseDay, suggestSite } from "./schedule";
+import type { Compound, DoseLog, Food, FoodLog, Goals, State, SymptomLog, Vial, WeightLog } from "./types.ts";
+import { dayKey, parseDay, suggestSite } from "./schedule.ts";
 
 const KEY = "titrate.v1";
 const BACKUP = "titrate.v1.backup";

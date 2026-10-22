@@ -1,4 +1,4 @@
-import type { Schedule } from "./types";
+import type { Schedule } from "./types.ts";
 
 export const SCHEDULES: { id: string; label: string; schedule: Schedule }[] = [
   { id: "daily", label: "Daily", schedule: { kind: "every", everyDays: 1 } },

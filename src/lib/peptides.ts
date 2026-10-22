@@ -1,4 +1,4 @@
-import type { Category, Peptide } from "./types";
+import type { Category, Peptide } from "./types.ts";
 
 /**
  * Reference values from published pharmacology. Half-life is plasma elimination

@@ -1,4 +1,4 @@
-import type { Category } from "./types";
+import type { Category } from "./types.ts";
 
 /** one tone per category, used for list dots and library rows */
 export const CATEGORY_DOT: Record<Category, string> = {

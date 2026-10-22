@@ -1,7 +1,7 @@
-import { unitsForDose, toMcg } from "./recon";
-import type { Compound, DoseLog, Vial } from "./types";
-import { addDays, daysBetween, parseDay } from "./schedule";
-import { doseOn } from "./titration";
+import { unitsForDose, toMcg } from "./recon.ts";
+import type { Compound, DoseLog, Vial } from "./types.ts";
+import { addDays, daysBetween, parseDay } from "./schedule.ts";
+import { doseOn } from "./titration.ts";
 
 /** bacteriostatic water keeps a mixed vial usable for about 28 days */
 export const BUD_DAYS = 28;

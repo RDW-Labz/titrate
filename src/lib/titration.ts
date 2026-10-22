@@ -1,5 +1,5 @@
-import type { Compound } from "./types";
-import { doseOnAt, parseDay, startOfDay } from "./schedule";
+import type { Compound } from "./types.ts";
+import { doseOnAt, parseDay, startOfDay } from "./schedule.ts";
 
 /** the dose in force on a given day: the latest scheduled step, else the base dose */
 export function doseOn(c: Compound, date: Date = new Date()): number {

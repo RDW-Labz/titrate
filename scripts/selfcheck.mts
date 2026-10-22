@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { reconstitute, unitsForDose, formatUnits } from "../src/lib/recon.ts";
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
+import { levelSeries, levelWord, levelNow } from "../src/lib/levels.ts";
 import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
@@ -148,4 +149,31 @@ test("a skipped dose satisfies the day without counting as taken", () => {
   assert.equal(skippedOn([skipped], "c1", now), true);
   assert.equal(anyLogOn([skipped], "c1", now)?.skipped, true);
   assert.equal(streak([skipped], now), 0, "a skip is not a logged day");
+});
+
+test("the projected curve is scaled so one dose peak reads as 100%", () => {
+  const c = compound({ peptideId: "tirzepatide", dose: 2500, unit: "mcg", schedule: { kind: "every", everyDays: 7 } });
+  const now = new Date(2026, 0, 10, 9);
+  const dose = { ...log(now), dose: 2500 }; // the log() fixture defaults to 250 mcg
+  const s = levelSeries([dose], c, now, 14, 7);
+  assert.ok(s.nextPeak > 90 && s.nextPeak < 220, `next peak was ${s.nextPeak}%`);
+  assert.equal(s.futureMarkers.length, 1, "one scheduled dose inside the week ahead");
+  const peak = levelNow([dose], c, new Date(+now + 24 * 3_600_000)); // tirzepatide peaks ~24 h after a dose
+  assert.ok(Math.abs(peak - 100) < 8, `a dose at its peak should read ~100%, got ${peak}`);
+});
+
+test("nothing is projected while the cycle is in its off phase", () => {
+  // a long off phase so every day in the week ahead is off
+  const c = compound({ cycle: { onDays: 7, offDays: 14 }, startDate: "2026-01-12" });
+  const now = new Date(2026, 0, 20, 9);
+  assert.equal(cycleInfo(c, now)?.phase, "off");
+  assert.equal(levelSeries([], c, now, 14, 7).futureMarkers.length, 0);
+});
+
+test("level words follow the percentages", () => {
+  assert.equal(levelWord(2), "cleared");
+  assert.equal(levelWord(20), "trough");
+  assert.equal(levelWord(50), "rising");
+  assert.equal(levelWord(100), "near peak");
+  assert.equal(levelWord(180), "stacked");
 });

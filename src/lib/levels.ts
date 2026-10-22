@@ -1,8 +1,8 @@
-import { curve, levelAt, type Dose } from "./pk";
-import { addDays, inCycle, scheduledOn } from "./schedule";
-import { doseOn } from "./titration";
-import { PEPTIDE_BY_ID } from "./peptides";
-import type { Compound, DoseLog } from "./types";
+import { curve, levelAt, type Dose } from "./pk.ts";
+import { addDays, inCycle, scheduledOn } from "./schedule.ts";
+import { doseOn } from "./titration.ts";
+import { PEPTIDE_BY_ID } from "./peptides.ts";
+import type { Compound, DoseLog } from "./types.ts";
 
 export function dosesFor(doses: DoseLog[], compoundId: string): Dose[] {
   return doses
