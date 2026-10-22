@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LogDoseButton, LogDot } from "@/components/log-dose";
-import { Btn, Empty } from "@/components/ui";
+import { Btn, CountdownRing, Empty } from "@/components/ui";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
-import { dayKey, humanIn, isDueOn, lastDose, nextDue } from "@/lib/schedule";
+import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 
 export default function TodayPage() {
@@ -22,7 +22,7 @@ export default function TodayPage() {
   if (compounds.length === 0) {
     return (
       <div className="pt-4">
-        <h1 className="px-1 text-[26px] font-semibold tracking-[-0.015em]">Today</h1>
+        <h1 className="px-1 text-[28px] font-semibold tracking-[-0.025em]">Today</h1>
         <div className="mt-4">
           <Empty title="Let's track something" body="Add a peptide and this screen becomes one big button: what's due, tap, done.">
             <Link
@@ -31,7 +31,7 @@ export default function TodayPage() {
             >
               Add a peptide
             </Link>
-            <Btn variant="line" onClick={() => actions.seed()}>
+            <Btn variant="quiet" onClick={() => actions.seed()}>
               Show me a sample
             </Btn>
           </Empty>
@@ -40,12 +40,19 @@ export default function TodayPage() {
     );
   }
 
-  const rows = compounds.map((c) => ({ c, due: isDueOn(c, doses, now), next: nextDue(c, doses, now) }));
+  const rows = compounds.map((c) => ({ c, due: isDueOn(c, doses, now), next: nextDoseMoment(c, doses, now) }));
   const dueRows = rows.filter((r) => r.due);
-  const hero = rows.find((r) => r.c.id === flash) ?? dueRows[0] ?? rows.sort((a, b) => (a.next?.getTime() ?? 9e15) - (b.next?.getTime() ?? 9e15))[0];
+  const hero =
+    rows.find((r) => r.c.id === flash) ??
+    dueRows[0] ??
+    [...rows].sort((a, b) => (a.next?.at.getTime() ?? 9e15) - (b.next?.at.getTime() ?? 9e15))[0];
   const others = rows.filter((r) => r.c.id !== hero?.c.id);
   const peptide = hero ? PEPTIDE_BY_ID.get(hero.c.peptideId) : undefined;
   const last = hero ? lastDose(doses, hero.c.id) : undefined;
+
+  const total = hero?.next ? hero.next.at.getTime() - (last ? +new Date(last.at) : +now - 86_400_000) : 1;
+  const elapsed = last ? +now - +new Date(last.at) : total;
+  const progress = hero?.due ? 1 : Math.min(1, Math.max(0.04, elapsed / Math.max(1, total)));
 
   const todayFood = foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now));
   const kcal = todayFood.reduce((n, f) => n + f.kcal, 0);
@@ -54,7 +61,7 @@ export default function TodayPage() {
   return (
     <div className="pt-3">
       <div className="enter flex items-baseline justify-between px-1">
-        <h1 className="text-[26px] font-semibold tracking-[-0.015em]">Today</h1>
+        <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.025em]">Today</h1>
         <span className="text-[13px] text-muted">
           {now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
         </span>
@@ -63,47 +70,59 @@ export default function TodayPage() {
       {hero ? (
         <section
           key={hero.c.id}
-          className="enter mt-3 rounded-[26px] bg-ink px-5 py-5 text-white"
+          className="enter relative mt-3 overflow-hidden rounded-[30px] bg-hero px-5 pt-5 pb-5 text-white"
           style={{ animationDelay: "40ms" }}
         >
-          <p className="text-[13px] font-medium text-white/55">{hero.due ? "Due now" : "Next up"}</p>
-          <div className="mt-1 flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="truncate text-[30px] leading-[1.1] font-semibold tracking-[-0.02em]">{hero.c.name}</h2>
-              <p className="num mt-1 text-[14px] text-white/65">
-                {hero.c.dose} {hero.c.unit} · {peptide?.frequency ?? "custom"}
-              </p>
+          <div
+            aria-hidden="true"
+            className="ring-glow pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#5ec8a8]/20 blur-2xl"
+          />
+          <div className="relative flex flex-col items-center">
+            <CountdownRing
+              progress={progress}
+              top={hero.due ? "Due now" : "Next dose"}
+              big={hero.due ? "Ready" : hero.next ? timeTo(hero.next.at, now) : "—"}
+              bottom={
+                hero.due
+                  ? ""
+                  : hero.next
+                    ? hero.next.at.toLocaleString(undefined, { weekday: "short", hour: "numeric" })
+                    : ""
+              }
+            />
+            <h2 className="mt-4 max-w-full truncate text-[27px] leading-tight font-semibold tracking-[-0.02em]">
+              {hero.c.name}
+            </h2>
+            <p className="num mt-1 text-[14px] text-white/60">
+              {hero.c.dose} {hero.c.unit} · {peptide?.frequency ?? "custom"}
+            </p>
+
+            <div className="mt-5 w-full">
+              <LogDoseButton
+                compound={hero.c}
+                className="w-full !rounded-2xl !bg-white !py-4 !text-[17px] !text-hero hover:!brightness-95"
+                onLogged={() => setFlash(hero.c.id)}
+              />
             </div>
-            <p className="num shrink-0 pt-1 text-[15px] text-white/80">
-              {hero.due ? "now" : hero.next ? humanIn(hero.next, now) : "—"}
+            <p className="mt-2.5 text-[12px] text-white/40">
+              {last ? `Last ${humanIn(new Date(last.at), now)}${last.site ? ` · ${last.site}` : ""}` : "First dose"}
             </p>
           </div>
-
-          <div className="mt-5">
-            <LogDoseButton
-              compound={hero.c}
-              className="w-full !rounded-2xl !bg-white !py-4 !text-[17px] !text-ink hover:!brightness-95"
-              onLogged={() => setFlash(hero.c.id)}
-            />
-          </div>
-          <p className="mt-2.5 text-[12.5px] text-white/45">
-            {last ? `Last ${humanIn(new Date(last.at), now)}${last.site ? ` · ${last.site}` : ""}` : "First dose"}
-          </p>
         </section>
       ) : null}
 
       {others.length > 0 ? (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-3 space-y-2.5">
           {others.map(({ c, due, next }, i) => (
             <li
               key={c.id}
-              className="enter flex items-center gap-3 rounded-2xl bg-card px-4 py-3"
-              style={{ animationDelay: `${80 + i * 45}ms` }}
+              className="enter flex items-center gap-3 rounded-[22px] bg-card px-4 py-3.5 shadow-card"
+              style={{ animationDelay: `${90 + i * 50}ms` }}
             >
               <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
                 <p className="truncate text-[16px] font-medium">{c.name}</p>
-                <p className="num text-[13px] text-muted">
-                  {c.dose} {c.unit} · {due ? "due today" : next ? humanIn(next, now) : "off cycle"}
+                <p className="num text-[12.5px] text-muted">
+                  {c.dose} {c.unit} · {due ? "due today" : next ? humanIn(next.at, now) : "off cycle"}
                 </p>
               </Link>
               {due ? <LogDot compound={c} /> : <span className="pr-1 text-[18px] text-muted">›</span>}
@@ -114,8 +133,8 @@ export default function TodayPage() {
 
       <Link
         href="/food"
-        className="enter press mt-3 flex items-center gap-3 rounded-2xl bg-card px-4 py-3.5"
-        style={{ animationDelay: "160ms" }}
+        className="enter press mt-3 flex items-center gap-3 rounded-[22px] bg-card px-4 py-4 shadow-card"
+        style={{ animationDelay: "190ms" }}
       >
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-medium">
@@ -128,7 +147,7 @@ export default function TodayPage() {
             />
           </div>
         </div>
-        <span className="num text-[13px] text-muted">{kcal} kcal</span>
+        <span className="num text-[12.5px] text-muted">{kcal} kcal</span>
       </Link>
     </div>
   );

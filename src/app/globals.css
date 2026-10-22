@@ -1,19 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #e9edef;
+  --color-paper: #edf1f5;
   --color-card: #ffffff;
-  --color-ink: #0d1a22;
-  --color-muted: #5d6f79;
-  --color-line: #d2dae0;
-  --color-accent: #0f6b57;
-  --color-accent-soft: #e3efeb;
+  --color-ink: #0f172a;
+  --color-hero: #101c26;
+  --color-muted: #64748b;
+  --color-line: #e2e8f0;
+  --color-accent: #0e7c66;
+  --color-accent-soft: #e3f1ec;
   --color-warn: #a2661a;
   --color-warn-soft: #f6ecdd;
   --color-alert: #a83226;
   --color-alert-soft: #f7e5e2;
   --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 10px 26px -16px rgb(15 23 42 / 0.28);
+  --shadow-float: 0 2px 6px rgb(15 23 42 / 0.06), 0 18px 40px -18px rgb(15 23 42 / 0.35);
+  --radius-card: 1.5rem;
 }
 
 html {
@@ -41,8 +45,8 @@ body {
   min-width: 0;
   background: #fff;
   border: 1px solid var(--color-line);
-  border-radius: 10px;
-  padding: 11px 12px;
+  border-radius: 0.875rem;
+  padding: 12px 13px;
   font: inherit;
   color: inherit;
 }
@@ -57,12 +61,12 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-/* ---------- motion ---------- */
+/* ---------------- motion ---------------- */
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -108,8 +112,20 @@ a:focus-visible {
   }
 }
 
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
 .enter {
-  animation: rise 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .pop {
@@ -117,15 +133,23 @@ a:focus-visible {
 }
 
 .press {
-  transition: transform 0.13s ease, background-color 0.16s ease, color 0.16s ease;
+  transition: transform 0.14s ease, background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
 }
 .press:active {
-  transform: scale(0.96);
+  transform: scale(0.965);
 }
 
 .chart-line {
   stroke-dasharray: 1;
   animation: drawn 0.9s ease-out both;
+}
+
+.ring-track {
+  transition: stroke-dasharray 0.9s cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+.ring-glow {
+  animation: breathe 4s ease-in-out infinite;
 }
 
 .burst span {
@@ -141,7 +165,11 @@ a:focus-visible {
 }
 
 .tab-pill {
-  transition: transform 0.34s cubic-bezier(0.3, 1.4, 0.5, 1);
+  transition: transform 0.36s cubic-bezier(0.3, 1.4, 0.5, 1), width 0.2s ease;
+}
+
+.scroll-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

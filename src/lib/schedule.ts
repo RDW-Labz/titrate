@@ -79,6 +79,23 @@ export function nextDue(c: Compound, doses: DoseLog[], from: Date, horizon = 400
   return null;
 }
 
+/** when the next dose is expected: right now if it's due, otherwise 9 am on the due day */
+export function nextDoseMoment(c: Compound, doses: DoseLog[], now: Date): { at: Date; due: boolean } | null {
+  if (isDueOn(c, doses, now)) return { at: now, due: true };
+  const day = nextDue(c, doses, now);
+  if (!day) return null;
+  return { at: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0, 0), due: false };
+}
+
+export function timeTo(at: Date, now: Date): string {
+  const mins = Math.round((at.getTime() - now.getTime()) / 60_000);
+  if (mins <= 0) return "Now";
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ${mins % 60}m`;
+  return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
 export function lastDose(doses: DoseLog[], compoundId: string): DoseLog | undefined {
   return doses
     .filter((d) => d.compoundId === compoundId && !d.skipped)

@@ -25,7 +25,7 @@ export default function FoodPage() {
     <div className="pt-3">
       <PageTitle meta={now.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}>Food</PageTitle>
 
-      <section className="enter rounded-2xl bg-card px-4 py-5">
+      <section className="enter rounded-[24px] bg-card px-4 py-5 shadow-card">
         <div className="flex items-center justify-around">
           <Ring value={protein} max={goals.p} label="protein" size={100} />
           <Ring value={kcal} max={goals.kcal} label="calories" size={100} />
@@ -47,7 +47,7 @@ export default function FoodPage() {
         ))}
       </div>
 
-      <ul className="mt-3 divide-y divide-line rounded-2xl bg-card">
+      <ul className="mt-3 divide-y divide-line rounded-[24px] bg-card shadow-card">
         {today.length === 0 ? (
           <li className="px-4 py-5 text-center text-[13.5px] text-muted">Tap one above to log breakfast.</li>
         ) : (
@@ -71,7 +71,7 @@ export default function FoodPage() {
         )}
       </ul>
 
-      <details className="mt-3 rounded-2xl bg-card px-4 py-3">
+      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
         <summary className="cursor-pointer text-[14px] font-semibold">Add something else</summary>
         <div className="mt-3 space-y-3">
           <Field label="Food">
@@ -114,7 +114,7 @@ export default function FoodPage() {
         </div>
       </details>
 
-      <details className="mt-3 rounded-2xl bg-card px-4 py-3">
+      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
         <summary className="cursor-pointer text-[14px] font-semibold">
           Weight{latest ? ` · ${latest.lb} lb` : ""}
           {delta !== null ? <span className="num text-muted"> ({delta > 0 ? "+" : ""}{delta})</span> : null}
@@ -136,7 +136,7 @@ export default function FoodPage() {
         </div>
       </details>
 
-      <details className="mt-3 rounded-2xl bg-card px-4 py-3">
+      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
         <summary className="cursor-pointer text-[14px] font-semibold">Daily targets</summary>
         <div className="mt-3 grid grid-cols-3 gap-2">
           {(

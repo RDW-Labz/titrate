@@ -39,7 +39,7 @@ export default function PeptidesPage() {
             return (
               <li
                 key={c.id}
-                className="enter flex items-center gap-3 rounded-2xl bg-card px-4 py-3.5"
+                className="enter flex items-center gap-3 rounded-[22px] bg-card px-4 py-3.5 shadow-card"
                 style={{ animationDelay: `${i * 45}ms` }}
               >
                 <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
@@ -55,7 +55,13 @@ export default function PeptidesPage() {
                           : ""}
                   </p>
                 </Link>
-                {due ? <LogDot compound={c} /> : <span className="pr-1 text-[18px] text-muted">›</span>}
+                {due ? (
+                  <LogDot compound={c} />
+                ) : (
+                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-paper text-[17px] text-muted">
+                    ›
+                  </span>
+                )}
               </li>
             );
           })}

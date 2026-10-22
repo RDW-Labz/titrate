@@ -23,7 +23,7 @@ export default function LibraryPage() {
         aria-label="Search peptides"
       />
 
-      <ul className="mt-3 divide-y divide-line rounded-2xl bg-card">
+      <ul className="mt-3 divide-y divide-line rounded-[24px] bg-card shadow-card">
         {list.map((p, i) => (
           <li key={p.id} className="enter" style={{ animationDelay: `${Math.min(i, 8) * 30}ms` }}>
             <Link href={`/library/${p.id}`} className="press flex items-center gap-3 px-4 py-3.5">

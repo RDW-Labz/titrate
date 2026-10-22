@@ -7,7 +7,7 @@ export default function CalcPage() {
   return (
     <div className="pt-3">
       <PageTitle meta="Vial + water in, units to draw out.">Calc</PageTitle>
-      <section className="enter rounded-2xl bg-card p-4">
+      <section className="enter rounded-[24px] bg-card p-4 shadow-card">
         <ReconCalculator />
       </section>
       <p className="mt-4 px-1 text-[12.5px] leading-relaxed text-muted">

@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
+import { BookIcon, CalcIcon, ForkIcon, HomeIcon, VialIcon } from "./icons";
 import { useReady } from "@/lib/store";
 
 const TABS = [
-  { href: "/", label: "Today" },
-  { href: "/protocols", label: "Peptides" },
-  { href: "/calc", label: "Calc" },
-  { href: "/food", label: "Food" },
-  { href: "/library", label: "Library" },
+  { href: "/", label: "Today", Icon: HomeIcon },
+  { href: "/protocols", label: "Peptides", Icon: VialIcon },
+  { href: "/calc", label: "Calc", Icon: CalcIcon },
+  { href: "/food", label: "Food", Icon: ForkIcon },
+  { href: "/library", label: "Library", Icon: BookIcon },
 ] as const;
 
 function TabBar() {
@@ -24,9 +25,11 @@ function TabBar() {
     <div className="relative">
       <span
         aria-hidden="true"
-        className="tab-pill absolute top-1.5 bottom-1.5 left-0 rounded-2xl bg-card"
+        className="tab-pill absolute top-0 bottom-0 left-0 flex items-center justify-center rounded-full bg-accent-soft"
         style={{ width: `${100 / TABS.length}%`, transform: `translateX(${index * 100}%)` }}
-      />
+      >
+        <span className="h-1 w-6 rounded-full bg-accent/25" />
+      </span>
       <ul className="relative flex">
         {TABS.map((t, i) => {
           const active = i === index;
@@ -35,11 +38,11 @@ function TabBar() {
               <Link
                 href={t.href}
                 aria-current={active ? "page" : undefined}
-                className={`press flex flex-col items-center gap-0.5 rounded-2xl py-2.5 text-[12px] font-semibold ${
+                className={`press relative flex flex-col items-center gap-1 py-2.5 text-[10.5px] font-semibold ${
                   active ? "text-accent" : "text-muted"
                 }`}
               >
-                <span className={`size-1.5 rounded-full transition-colors ${active ? "bg-accent" : "bg-transparent"}`} />
+                <t.Icon className={active ? "size-[21px]" : "size-[21px] opacity-80"} />
                 {t.label}
               </Link>
             </li>
@@ -57,13 +60,13 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[460px] flex-col">
       <main className="flex-1 px-4 pb-32">
-        {ready ? children : <div className="pt-20 text-center text-[14px] text-muted">Opening your day…</div>}
+        {ready ? children : <div className="pt-24 text-center text-[14px] text-muted">Opening your day…</div>}
       </main>
       <nav
         aria-label="Main"
-        className="fixed bottom-0 left-1/2 z-10 w-full max-w-[460px] -translate-x-1/2 border-t border-line bg-paper/90 px-3 pt-1 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur-md"
+        className="fixed bottom-[max(14px,env(safe-area-inset-bottom))] left-1/2 z-10 w-[calc(100%-24px)] max-w-[432px] -translate-x-1/2 rounded-full bg-card p-1.5 shadow-float"
       >
-        <Suspense fallback={<div className="h-[62px]" />}>
+        <Suspense fallback={<div className="h-[58px]" />}>
           <TabBar />
         </Suspense>
       </nav>

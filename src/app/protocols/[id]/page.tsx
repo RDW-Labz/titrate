@@ -72,7 +72,7 @@ export default function ProtocolDetailPage() {
         </p>
       </div>
 
-      <section className="enter mt-3 rounded-2xl bg-card px-4 py-4">
+      <section className="enter mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
         <div className="flex items-center justify-between">
           <p className="text-[14px] text-muted">
             {isDueOn(compound, doses, now) ? "Ready when you are" : next ? `Next ${humanIn(next, now)}` : "Off cycle"}
@@ -103,7 +103,7 @@ export default function ProtocolDetailPage() {
         ) : null}
       </section>
 
-      <details className="mt-3 rounded-2xl bg-card px-4 py-3.5">
+      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
         <summary className="cursor-pointer text-[15px] font-semibold">Vial</summary>
         <div className="mt-3">
           {vial && status ? (
@@ -139,7 +139,7 @@ export default function ProtocolDetailPage() {
         </div>
       </details>
 
-      <details className="mt-3 rounded-2xl bg-card px-4 py-3.5">
+      <details className="mt-3 rounded-[24px] bg-card px-4 py-3.5 shadow-card">
         <summary className="cursor-pointer text-[15px] font-semibold">
           Dose &amp; history
           <span className="num ml-2 text-[13px] text-muted">

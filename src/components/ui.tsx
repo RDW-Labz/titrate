@@ -10,14 +10,14 @@ export function Card({
   className?: string;
   as?: "section" | "div" | "article";
 }) {
-  return <As className={`rounded-2xl bg-card ${className}`}>{children}</As>;
+  return <As className={`rounded-[var(--radius-card)] bg-card shadow-card ${className}`}>{children}</As>;
 }
 
 export function PageTitle({ children, meta }: { children: ReactNode; meta?: ReactNode }) {
   return (
-    <div className="px-1 pt-1 pb-4">
-      <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">{children}</h1>
-      {meta ? <p className="mt-1 text-[13.5px] text-muted">{meta}</p> : null}
+    <div className="px-1 pt-2 pb-4">
+      <h1 className="text-[28px] leading-[1.1] font-semibold tracking-[-0.025em]">{children}</h1>
+      {meta ? <p className="mt-1.5 text-[13.5px] text-muted">{meta}</p> : null}
     </div>
   );
 }
@@ -32,7 +32,7 @@ export function SectionHead({ children, right }: { children: ReactNode; right?: 
 }
 
 type BtnProps = {
-  variant?: "primary" | "quiet" | "line";
+  variant?: "primary" | "quiet" | "line" | "white";
   size?: "sm" | "md" | "lg";
   className?: string;
 } & ComponentProps<"button">;
@@ -40,14 +40,15 @@ type BtnProps = {
 const BTN = {
   primary: "bg-accent text-white hover:brightness-110",
   quiet: "bg-accent-soft text-accent",
-  line: "bg-card text-ink",
+  line: "bg-card text-ink shadow-card",
+  white: "bg-white text-hero hover:brightness-95",
 };
 
 export function Btn({ variant = "primary", size = "md", className = "", ...rest }: BtnProps) {
   const sizes = {
     sm: "px-3 py-2 text-[13.5px] rounded-xl",
-    md: "px-4 py-3 text-[15px] rounded-xl",
-    lg: "px-5 py-4 text-[16.5px] rounded-2xl",
+    md: "px-4 py-3 text-[15px] rounded-2xl",
+    lg: "px-5 py-4 text-[17px] rounded-2xl",
   } as const;
   return (
     <button
@@ -71,7 +72,7 @@ export function LinkBtn({
   return (
     <Link
       href={href}
-      className={`press inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[15px] font-semibold ${BTN[variant]} ${className}`}
+      className={`press inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[15px] font-semibold ${BTN[variant]} ${className}`}
     >
       {children}
     </Link>
@@ -119,7 +120,7 @@ export function Pill({
 }
 
 /** counts up to `value`, so a number feels like it landed */
-export function useCountUp(value: number, ms = 550) {
+export function useCountUp(value: number, ms = 600) {
   const [n, setN] = useState(value);
   const from = useRef(value);
   useEffect(() => {
@@ -142,54 +143,98 @@ export function useCountUp(value: number, ms = 550) {
   return n;
 }
 
+function RingSvg({
+  pct,
+  size,
+  stroke,
+  track = "var(--color-line)",
+  width = 8,
+  children,
+}: {
+  pct: number;
+  size: number;
+  stroke: string;
+  track?: string;
+  width?: number;
+  children?: ReactNode;
+}) {
+  const [drawn, setDrawn] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setDrawn(Math.min(1, Math.max(0, pct))), 60);
+    return () => clearTimeout(t);
+  }, [pct]);
+  const r = size / 2 - width / 2 - 2;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={width} opacity={0.35} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={stroke}
+          strokeWidth={width}
+          strokeLinecap="round"
+          strokeDasharray={`${c * drawn} ${c}`}
+          className="ring-track"
+        />
+      </svg>
+      {children ? <div className="absolute inset-0 flex flex-col items-center justify-center">{children}</div> : null}
+    </div>
+  );
+}
+
+/** big hero ring: time until the next dose, with the fractional interval already elapsed */
+export function CountdownRing({
+  progress,
+  top,
+  big,
+  bottom,
+  size = 176,
+}: {
+  progress: number;
+  top: string;
+  big: string;
+  bottom: string;
+  size?: number;
+}) {
+  return (
+    <RingSvg pct={progress} size={size} stroke="#5ec8a8" track="#ffffff" width={10}>
+      <span className="text-[11.5px] font-medium text-white/55">{top}</span>
+      <span className="num mt-1 text-[26px] leading-none font-semibold text-white">{big}</span>
+      <span className="mt-1 text-[11.5px] text-white/55">{bottom}</span>
+    </RingSvg>
+  );
+}
+
 export function Ring({
   value,
   max,
-  size = 88,
+  size = 96,
   label,
-  sub,
 }: {
   value: number;
   max: number;
   size?: number;
   label: string;
-  sub?: string;
 }) {
-  const pct = max > 0 ? Math.min(1, value / max) : 0;
-  const r = size / 2 - 6;
-  const c = 2 * Math.PI * r;
   const shown = useCountUp(Math.round(value));
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-line)" strokeWidth="7" />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            fill="none"
-            stroke="var(--color-accent)"
-            strokeWidth="7"
-            strokeLinecap="round"
-            strokeDasharray={`${c * pct} ${c}`}
-            style={{ transition: "stroke-dasharray .7s cubic-bezier(.2,.7,.2,1)" }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="num text-[17px] leading-none font-semibold">{shown}</span>
-          <span className="num text-[10.5px] text-muted">of {Math.round(max)}</span>
-        </div>
-      </div>
+    <div className="flex flex-col items-center gap-2">
+      <RingSvg pct={max > 0 ? value / max : 0} size={size} stroke="var(--color-accent)" width={8}>
+        <span className="num text-[19px] leading-none font-semibold">{shown}</span>
+        <span className="num text-[10.5px] text-muted">of {Math.round(max)}</span>
+      </RingSvg>
       <span className="text-[12.5px] text-muted">{label}</span>
-      {sub ? <span className="num text-[11px] text-muted">{sub}</span> : null}
     </div>
   );
 }
 
 export function Empty({ title, body, children }: { title: string; body: string; children?: ReactNode }) {
   return (
-    <div className="enter rounded-2xl bg-card px-5 py-8 text-center">
+    <div className="enter rounded-[var(--radius-card)] bg-card px-5 py-8 text-center shadow-card">
       <p className="text-[17px] font-semibold">{title}</p>
       <p className="mx-auto mt-1.5 max-w-[30ch] text-[14px] leading-relaxed text-muted">{body}</p>
       {children ? <div className="mt-4 flex flex-col gap-2">{children}</div> : null}
