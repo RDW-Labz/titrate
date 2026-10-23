@@ -7,6 +7,7 @@ import { toast } from "@/components/toast";
 import { REMINDERS_KEY } from "@/components/reminders";
 import { EMPTY, actions, useStore } from "@/lib/store";
 import { dosesIcs } from "@/lib/ics";
+import { dosesCsv } from "@/lib/export";
 import type { State } from "@/lib/types";
 
 const KEY = "titrate.v1";
@@ -108,27 +109,7 @@ export default function SettingsPage() {
             size="sm"
             variant="line"
             onClick={() => {
-              const rows = [
-                ["date", "time", "compound", "dose", "unit", "units_drawn", "site", "skipped"],
-                ...state.doses
-                  .slice()
-                  .sort((a, b) => +new Date(a.at) - +new Date(b.at))
-                  .map((d) => {
-                    const at = new Date(d.at);
-                    const c = state.compounds.find((x) => x.id === d.compoundId);
-                    return [
-                      at.toLocaleDateString("en-CA"),
-                      at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-                      c?.name ?? "",
-                      String(d.dose),
-                      d.unit,
-                      d.units ? String(d.units) : "",
-                      d.site ?? "",
-                      d.skipped ? "yes" : "",
-                    ];
-                  }),
-              ];
-              const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
+              const csv = dosesCsv(state.doses, state.compounds);
               const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
               const a = document.createElement("a");
               a.href = url;

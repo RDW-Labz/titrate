@@ -4,6 +4,7 @@ import { reconstitute, unitsForDose, formatUnits, waterToFit } from "../src/lib/
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
 import { levelSeries, levelWord, levelNow } from "../src/lib/levels.ts";
 import { dosesIcs } from "../src/lib/ics.ts";
+import { dosesCsv } from "../src/lib/export.ts";
 import { parseLine, toLang } from "../src/lib/intent.ts";
 import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
@@ -243,4 +244,18 @@ test("levels and mixing get their own cards, and junk gets nothing", () => {
 
   assert.equal(parseLine("hello", mine), null);
   assert.equal(parseLine("250 mcg", mine), null, "no peptide named");
+});
+
+test("the CSV quotes every field, sorts oldest first and marks skips", () => {
+  const mine = [compound({ id: "c1", name: 'BPC-157, "the good one"' })];
+  const later = { ...log(new Date(2026, 0, 11, 21, 5)), site: "Left thigh", units: 10 };
+  const earlier = { ...log(new Date(2026, 0, 10, 9, 0)), unit: "mcg" as const };
+  const skip: DoseLog = { ...log(new Date(2026, 0, 12, 9, 0)), skipped: true };
+  const lines = dosesCsv([later, skip, earlier], mine).split("\n");
+  assert.equal(lines.length, 4, "header plus three doses");
+  assert.equal(lines[0], '"date","time","compound","dose","unit","units_drawn","site","skipped"');
+  assert.ok(lines[1].startsWith('"2026-01-10","09:00"'), "oldest first");
+  assert.ok(lines[1].includes('"BPC-157, ""the good one"""'), "commas and quotes escaped");
+  assert.ok(lines[3].endsWith('"yes"'), "a skipped dose is marked");
+  assert.ok(!lines[1].includes('"yes"'));
 });
