@@ -61,20 +61,24 @@ export default function SymptomsPage() {
                         {new Date(s.at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
                       </span>
                       <span className="flex-1 text-[14px]">{s.name}</span>
-                      <span className="flex gap-1" aria-label={`Severity ${s.severity} of 3`}>
-                        {[1, 2, 3].map((n) => (
-                          <button
-                            key={n}
-                            aria-label={`Set ${s.name} severity ${n}`}
-                            onClick={() => actions.updateSymptom(s.id, { severity: n as 1 | 2 | 3 })}
-                            className={`size-2.5 rounded-full ${n <= s.severity ? "bg-warn" : "bg-line"}`}
-                          />
-                        ))}
-                      </span>
+                      {/* one target that cycles, like the sheet — three 10 px dots were untappable */}
+                      <button
+                        aria-label={`${s.name}, severity ${s.severity} of 3. Tap to change`}
+                        onClick={() =>
+                          actions.updateSymptom(s.id, { severity: ((s.severity % 3) + 1) as 1 | 2 | 3 })
+                        }
+                        className="press grid size-11 place-items-center"
+                      >
+                        <span className="flex gap-1" aria-hidden="true">
+                          {[1, 2, 3].map((n) => (
+                            <span key={n} className={`size-2.5 rounded-full ${n <= s.severity ? "bg-warn" : "bg-line"}`} />
+                          ))}
+                        </span>
+                      </button>
                       <button
                         aria-label={`Delete ${s.name}`}
                         onClick={() => actions.deleteSymptom(s.id)}
-                        className="press grid size-9 place-items-center text-[13px] text-muted"
+                        className="press grid size-11 place-items-center text-[13px] text-muted"
                       >
                         ✕
                       </button>

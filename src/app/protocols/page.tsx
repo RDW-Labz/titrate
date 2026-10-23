@@ -74,7 +74,7 @@ export default function PeptidesPage() {
     <div className="pt-3">
       <div className="enter flex items-baseline justify-between px-1">
         <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.025em]">Peptides</h1>
-        <Link href="/start" className="press text-[14px] font-semibold text-accent">
+        <Link href="/start" className="press -my-2 inline-block py-2 text-[14px] font-semibold text-accent">
           Add
         </Link>
       </div>

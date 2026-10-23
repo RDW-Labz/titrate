@@ -87,7 +87,7 @@ export default function FoodPage() {
 
       <div className="mb-3 flex items-center justify-between rounded-full bg-card px-2 py-1.5 shadow-card">
         <button
-          className="press grid size-9 place-items-center rounded-full text-[17px] text-muted"
+          className="press grid size-11 place-items-center rounded-full text-[17px] text-muted"
           onClick={() => setBack(back + 1)}
           aria-label="Previous day"
         >
@@ -95,7 +95,7 @@ export default function FoodPage() {
         </button>
         <span className="text-[14px] font-semibold">{label}</span>
         <button
-          className="press grid size-9 place-items-center rounded-full text-[17px] disabled:opacity-30"
+          className="press grid size-11 place-items-center rounded-full text-[17px] disabled:opacity-30"
           onClick={() => setBack(Math.max(0, back - 1))}
           disabled={back === 0}
           aria-label="Next day"
@@ -120,7 +120,7 @@ export default function FoodPage() {
                 const id = actions.addWater(GLASS, at());
                 toast(`+${GLASS} mL`, { label: "Undo", run: () => actions.deleteWater(id) });
               }}
-              className="press flex items-center gap-2 text-[13px] text-muted"
+              className="press -my-2 flex items-center gap-2 py-2 text-[13px] text-muted"
             >
               Water <span className="num font-medium text-ink">{(ml / 1000).toFixed(2)} L</span>
               <span className="text-[11px] text-accent">+{GLASS} mL</span>
@@ -160,7 +160,7 @@ export default function FoodPage() {
           ) : (
             <button
               onClick={() => setWeightOpen(true)}
-              className="press flex w-full items-center justify-between text-[13px] text-muted"
+              className="press -my-2 flex w-full items-center justify-between py-2 text-[13px] text-muted"
             >
               <span>
                 Weight {latest ? <span className="num font-medium text-ink">{latest.lb} lb</span> : "—"}
@@ -168,7 +168,7 @@ export default function FoodPage() {
               <span className="font-medium text-accent">{latest ? "Update" : "Add"}</span>
             </button>
           )}
-          <Link href="/photos" className="press mt-2 block text-[12.5px] font-medium text-accent">
+          <Link href="/photos" className="press mt-2 block py-1 text-[12.5px] font-medium text-accent">
             Progress photos ›
           </Link>
         </div>
@@ -219,7 +219,7 @@ export default function FoodPage() {
               <button
                 aria-label={`Delete ${f.name}`}
                 onClick={() => actions.deleteFood(f.id)}
-                className="press grid size-9 place-items-center text-[15px] text-muted"
+                className="press grid size-11 place-items-center text-[15px] text-muted"
               >
                 ✕
               </button>

@@ -205,7 +205,7 @@ function Protocol() {
                   </span>
                   <button
                     aria-label={`Remove ${s.at}`}
-                    className="press grid size-9 place-items-center text-[13px] text-muted"
+                    className="press grid size-11 place-items-center text-[13px] text-muted"
                     onClick={() => actions.setTitration(compound.id, steps.filter((x) => x !== s))}
                   >
                     ✕
@@ -382,7 +382,7 @@ function Protocol() {
                         )}
                         <button
                           aria-label={`Delete dose ${dayKey(at)}`}
-                          className="press grid size-9 place-items-center text-[13px] text-muted"
+                          className="press grid size-11 place-items-center text-[13px] text-muted"
                           onClick={() => actions.deleteDose(d.id)}
                         >
                           ✕

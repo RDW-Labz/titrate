@@ -47,7 +47,7 @@ const BTN = {
 
 export function Btn({ variant = "primary", size = "md", className = "", ...rest }: BtnProps) {
   const sizes = {
-    sm: "px-3 py-2 text-[13.5px] rounded-xl",
+    sm: "px-3 py-2.5 text-[13.5px] rounded-xl",
     md: "px-4 py-3 text-[15px] rounded-2xl",
     lg: "px-5 py-4 text-[17px] rounded-2xl",
   } as const;
