@@ -123,7 +123,7 @@ export default function SettingsPage() {
               a.download = `titrate-${new Date().toISOString().slice(0, 10)}.json`;
               a.click();
               URL.revokeObjectURL(url);
-              toast(shots.length ? `Saved a copy with ${shots.length} photos` : "Saved a copy");
+              toast(shots.length ? `Saved a copy with ${shots.length} photo${shots.length === 1 ? "" : "s"}` : "Saved a copy");
             }}
           >
             Download
