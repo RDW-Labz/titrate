@@ -11,6 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Titrate — peptide protocol tracker",
     short_name: "Titrate",
     description: "Doses, cycles, reconstitution math and levels for peptides and GLP-1s.",
+    id: `${base}/`,
+    scope: `${base}/`,   // keeps in-app navigation inside the installed window
     start_url: `${base}/`,
     display: "standalone",
     background_color: "#edf1f5",

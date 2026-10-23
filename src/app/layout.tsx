@@ -21,6 +21,8 @@ export const metadata: Metadata = {
     "Dose and cycle tracking, reconstitution math, estimated level curves and GLP-1 nutrition in one place.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Titrate" },
+  // Next emits only the standard mobile-web-app-capable; iOS still wants the apple- one to open standalone
+  other: { "apple-mobile-web-app-capable": "yes" },
   icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-192.png`, apple: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-180.png` },
 };
 
