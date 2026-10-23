@@ -119,6 +119,38 @@ export function Pill({
   );
 }
 
+/** keeps Tab inside an open overlay, closes on Escape, hands focus back to the trigger */
+export function useDialog(open: boolean, onClose: () => void) {
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const back = document.activeElement as HTMLElement | null;
+    panel.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return onClose();
+      if (e.key !== "Tab" || !panel.current) return;
+      const f = panel.current.querySelectorAll<HTMLElement>("button, a[href], input, select, textarea");
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      const at = document.activeElement;
+      if (!e.shiftKey && at === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && (at === first || at === panel.current)) {
+        e.preventDefault();
+        last.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      back?.focus();
+    };
+  }, [open, onClose]);
+  return panel;
+}
+
 /** counts up to `value`, so a number feels like it landed */
 export function useCountUp(value: number, ms = 600) {
   const [n, setN] = useState(value);

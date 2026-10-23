@@ -68,11 +68,14 @@ Server runs at `http://localhost:3000`. Test file: `scripts/selfcheck.mts` (expl
 
 1. **Model-backed Type it** — `parseLine()` in `src/lib/intent.ts` is deterministic; replacing it with a
    fetch that returns OpenUI Lang is the whole change. Needs an API key + a route (breaks the no-server rule).
-2. **Accessibility pass on the new surfaces** — the bottom sheet (`SymptomSheet`) and the photo viewer have
-   no focus trap; the Type it result needs `aria-live`.
-3. **Deploy** — Vercel import of `RDW-Labz/titrate` (repo is pushed and current).
-4. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
+2. **Deploy** — Vercel import of `RDW-Labz/titrate` (repo is pushed and current).
+3. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
    shell). Manifest shortcuts + calendar export are the web substitutes already shipped.
+
+Done: **overlay a11y** — `useDialog(open, onClose)` in `src/components/ui.tsx` gives all three overlays
+(`SymptomSheet`, photo viewer, `SitePicker`) a focus trap, Escape, and focus return to the trigger; the Type it
+card host is `aria-live="polite"`. Verified in the DOM with real Tab/Shift-Tab/Escape keystrokes. Not done:
+body scroll still moves behind an open sheet, and the backdrop is mouse-only (no tabbable Close).
 
 ## Conventions the user expects
 

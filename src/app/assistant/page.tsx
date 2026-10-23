@@ -106,7 +106,7 @@ export default function AssistantPage() {
         ))}
       </div>
 
-      <div className="mt-4" ref={hostRef}>
+      <div className="mt-4" ref={hostRef} aria-live="polite">
         <CardActions value={{ accept }}>
           {lang ? <Renderer library={library} response={lang} isStreaming={false} /> : null}
         </CardActions>

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { GearIcon } from "@/components/icons";
 import { LevelChart } from "@/components/level-chart";
 import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
-import { Btn, CountdownRing, Empty } from "@/components/ui";
+import { Btn, CountdownRing, Empty, useDialog } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
 import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
@@ -307,11 +307,16 @@ function SymptomSheet({
   logged: { id: string; name: string; severity: 1 | 2 | 3 }[];
   onToggle: (name: string) => void;
 }) {
+  const panel = useDialog(open, onClose);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Side effects">
       <button className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" onClick={onClose} aria-label="Close" />
-      <div className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))]">
+      <div
+        ref={panel}
+        tabIndex={-1}
+        className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))] outline-none"
+      >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
         <p className="text-[16px] font-semibold">Any side effects?</p>
         <p className="mt-0.5 text-[12.5px] text-muted">

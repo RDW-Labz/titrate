@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useDialog } from "@/components/ui";
 
 type Pt = { name: string; x: number; y: number };
 
@@ -52,15 +53,7 @@ export function SitePicker({
   onPick: (site: string) => void;
 }) {
   const [side, setSide] = useState<"front" | "back">("front");
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  const panel = useDialog(open, onClose);
 
   if (!open) return null;
   const pts = side === "front" ? FRONT : BACK;
@@ -73,7 +66,11 @@ export function SitePicker({
       aria-label="Choose an injection site"
     >
       <button className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" onClick={onClose} aria-label="Close" />
-      <div className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))]">
+      <div
+        ref={panel}
+        tabIndex={-1}
+        className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))] outline-none"
+      >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
         <div className="flex items-center justify-between">
           <p className="text-[16px] font-semibold">Injection site</p>

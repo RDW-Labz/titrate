@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Btn, PageTitle } from "@/components/ui";
+import { Btn, PageTitle, useDialog } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { addPhoto, deletePhoto, listPhotos, shrink, type Photo } from "@/lib/photos";
 
 export default function PhotosPage() {
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [open, setOpen] = useState<string | null>(null);
+  const panel = useDialog(open !== null, () => setOpen(null));
 
   useEffect(() => {
     listPhotos()
@@ -79,7 +80,14 @@ export default function PhotosPage() {
       </div>
 
       {open ? (
-        <div className="fixed inset-0 z-40 flex flex-col bg-ink/90 p-4" role="dialog" aria-modal="true" aria-label="Photo">
+        <div
+          ref={panel}
+          tabIndex={-1}
+          className="fixed inset-0 z-40 flex flex-col bg-ink/90 p-4 outline-none"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo"
+        >
           <div className="flex items-center justify-between text-white">
             <span className="num text-[13px]">{new Date(photos?.find((p) => p.id === open)?.at ?? "").toLocaleDateString()}</span>
             <button onClick={() => setOpen(null)} className="press px-2 py-1 text-[15px] font-semibold">
