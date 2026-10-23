@@ -9,7 +9,7 @@ no database. All state is `localStorage` under `titrate.v1` (one-key backup in `
 progress photos are IndexedDB `titrate-photos` because images blow the 5 MB key budget.
 
 Repo `~/peptide-tracker` — Next 16.4.2, React 19, Tailwind 4, TypeScript. 47 files, ~5.9k lines in `src/`.
-Pushed to `https://github.com/RDW-Labz/titrate` (private), branch `main`, nothing deployed yet.
+Public at `https://github.com/RDW-Labz/titrate`, branch `main`. **Live: https://rdw-labz.github.io/titrate/** (GitHub Pages, static export, rebuilt on every push to `main`).
 
 ## Run + verify
 
@@ -17,9 +17,13 @@ Pushed to `https://github.com/RDW-Labz/titrate` (private), branch `main`, nothin
 cd ~/peptide-tracker
 lsof -nP -iTCP:3000 -sTCP:LISTEN | awk 'NR>1{print $2}' | xargs -r kill   # never pkill by name
 pnpm test                     # 27 node:test checks, must print "pass 27 / fail 0"
-pnpm build && (./node_modules/.bin/next start -p 3000 >/tmp/titrate-run.log 2>&1 < /dev/null &)
+pnpm dev                      # local: http://localhost:3000 (no basePath)
 ```
-Server runs at `http://localhost:3000`. Test file: `scripts/selfcheck.mts` (explicit path, not a directory).
+
+Production is a **static export** — there is no `next start` any more. `pnpm build` writes `out/`;
+CI builds it with `PAGES_BASE_PATH=/titrate` and Pages serves it there. To check the built artifact
+locally, serve `out/` under that prefix (a five-line Python `translate_path` shim is enough) and open
+`http://127.0.0.1:3050/titrate/`. Test file: `scripts/selfcheck.mts` (explicit path, not a directory).
 `src/lib/*` uses explicit `.ts` import specifiers so Node can strip types and run the real modules.
 
 ## Screens (all hand-built React; no generative layer except `/assistant`)
@@ -28,13 +32,13 @@ Server runs at `http://localhost:3000`. Test file: `scripts/selfcheck.mts` (expl
 |---|---|
 | `/` | Hero: countdown ring, level mini-curve, one-tap Log (locks after the dose), site link, skip, week dots, other compounds, log-all, protein, "Any side effects?" sheet |
 | `/protocols` | Your compounds: search (stack + library + screens), 28-day adherence donut, archive toggle |
-| `/protocols/[id]` | Level chart with 7-day projection, Log, cycle bar; vial, dose, schedule, history behind one More |
+| `/protocols/view?id=` | Level chart with 7-day projection, Log, cycle bar; vial, dose, schedule, history behind one More |
 | `/protocols/new?p=` | Prefilled setup, one tap to create |
 | `/start` | First run: GLP-1 pen vs mixing your own vial |
 | `/calc` | Reconstitution: vial + water + dose + syringe → units, barrel drawn to scale |
 | `/food` | Day stepper, protein/kcal rings, water, weight, favourite chips, list, More (add food, targets, trend) |
 | `/photos` | Progress photos (IndexedDB, shrunk to ≤1200 px) |
-| `/library`, `/library/[id]` | 20 compounds: half-life, tmax, range, cycle convention |
+| `/library`, `/library/view?id=` | 20 compounds: half-life, tmax, range, cycle convention |
 | `/summary` | Clinician one-pager, copy/share, **Print → PDF** |
 | `/symptoms` | Side effects, 30 days, severity dots, delete |
 | `/settings` | Reminders, backup/restore/undo, doses CSV, calendar .ics, Type it, summary, reset, install hint |
@@ -62,15 +66,27 @@ Server runs at `http://localhost:3000`. Test file: `scripts/selfcheck.mts` (expl
   disclosures. Count what a state flag actually renders.
 - `text-transform: uppercase` changes `innerText` — DOM checks for card labels must be case-insensitive.
 - Never `pnpm build` while a server holds `.next`: every route but `/` then 404s.
+- **Static export cannot have a dynamic segment over `localStorage` ids.** `/protocols/[id]` and
+  `/library/[id]` are now `/protocols/view?id=` and `/library/view?id=`, read with `useIdParam()` behind a
+  `Suspense` boundary (`useSearchParams` needs one to prerender). Any *new* per-item page inherits this.
+- `output: "export"` also drops `cacheComponents`/`partialPrefetching` and needs `export const dynamic =
+  "force-static"` on `manifest.ts` before it will build.
+- **basePath is not applied to strings in `manifest.ts` or `metadata.icons`** — they are prefixed by hand from
+  `NEXT_PUBLIC_BASE_PATH`; forget it and install points at the org root.
+- A **private** repo makes Pages org-login-only (`github.com/pages/auth` redirect) and serves it at the domain
+  ROOT, not `/<repo>` — which silently breaks a `/titrate` build. Public repo → `rdw-labz.github.io/titrate`.
 - Accessible contrast: accent `#0d7460` (was `#0e7c66`, 4.41 on accent-soft). All screens ≥ AA now.
 
 ## Open work, in the order it was queued
 
 1. **Model-backed Type it** — `parseLine()` in `src/lib/intent.ts` is deterministic; replacing it with a
    fetch that returns OpenUI Lang is the whole change. Needs an API key + a route (breaks the no-server rule).
-2. **Deploy** — Vercel import of `RDW-Labz/titrate` (repo is pushed and current).
-3. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
+2. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
    shell). Manifest shortcuts + calendar export are the web substitutes already shipped.
+
+Done: **deploy** — repo is public, Pages is live at https://rdw-labz.github.io/titrate/, workflow
+`.github/workflows/pages.yml` (pnpm 12, Node 24, `pnpm test` before build). Verify a deploy by loading the live
+URL and sweeping all 13 routes, not by reading the run log.
 
 Done: **overlay a11y** — `useDialog(open, onClose)` in `src/components/ui.tsx` gives all three overlays
 (`SymptomSheet`, photo viewer, `SitePicker`) a focus trap, Escape, and focus return to the trigger; the Type it
