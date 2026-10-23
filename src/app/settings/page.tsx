@@ -8,6 +8,7 @@ import { REMINDERS_KEY } from "@/components/reminders";
 import { EMPTY, actions, useStore } from "@/lib/store";
 import { dosesIcs } from "@/lib/ics";
 import { addPhoto, deletePhoto, listPhotos } from "@/lib/photos";
+import { BACKUP_KEY } from "@/lib/backup";
 import { dosesCsv } from "@/lib/export";
 import type { State } from "@/lib/types";
 
@@ -123,6 +124,7 @@ export default function SettingsPage() {
               a.download = `titrate-${new Date().toISOString().slice(0, 10)}.json`;
               a.click();
               URL.revokeObjectURL(url);
+              localStorage.setItem(BACKUP_KEY, String(Date.now()));
               toast(shots.length ? `Saved a copy with ${shots.length} photo${shots.length === 1 ? "" : "s"}` : "Saved a copy");
             }}
           >

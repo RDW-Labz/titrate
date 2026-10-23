@@ -30,7 +30,7 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
 
 | Route | Job |
 |---|---|
-| `/` | Hero: countdown ring, level mini-curve, one-tap Log (locks after the dose), site link, skip, week dots, other compounds, log-all, protein, "Any side effects?" sheet |
+| `/` | Backup nudge, hero: countdown ring, level mini-curve, one-tap Log (locks after the dose), site link, skip, week dots, other compounds, log-all, protein, "Any side effects?" sheet |
 | `/protocols` | Your compounds: search (stack + library + screens), 28-day adherence donut, archive toggle |
 | `/protocols/view?id=` | Level chart with 7-day projection, Log, cycle bar; weight vs dose steps; vial, dose, schedule, history behind one More |
 | `/protocols/new?p=` | Prefilled setup, one tap to create |

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BackupNudge } from "@/components/backup-nudge";
 import { GearIcon } from "@/components/icons";
 import { LevelChart } from "@/components/level-chart";
 import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
@@ -270,6 +271,8 @@ export default function TodayPage() {
           <span aria-hidden="true" className="text-[16px]">›</span>
         </span>
       </button>
+
+      <BackupNudge />
 
       <SymptomSheet
         open={symptomsOpen}

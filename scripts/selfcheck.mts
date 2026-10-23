@@ -9,10 +9,22 @@ import { dosesIcs } from "../src/lib/ics.ts";
 import { dosesCsv } from "../src/lib/export.ts";
 import { parseLine, toLang } from "../src/lib/intent.ts";
 import { weightVsSteps } from "../src/lib/progress.ts";
+import { backupDue } from "../src/lib/backup.ts";
 import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
 const hours = (h: number) => h * 3_600_000;
+
+test("the backup nudge fires on a missing or stale backup, and a snooze always wins", () => {
+  const now = Date.UTC(2026, 9, 23);
+  const day = 86_400_000;
+  assert.equal(backupDue(null, now, null), true, "never backed up");
+  assert.equal(backupDue(now - 29 * day, now, null), false, "29 days is still fine");
+  assert.equal(backupDue(now - 31 * day, now, null), true, "31 days is stale");
+  assert.equal(backupDue(now - 90 * day, now, now + 2 * day), false, "snoozed beats stale");
+  assert.equal(backupDue(now - 90 * day, now, now - day), true, "an expired snooze does not silence it");
+  assert.equal(backupDue(null, now, now + day), false, "snooze beats never-backed-up");
+});
 
 test("weight and dose steps share one 90-day axis, and old entries fall off it", () => {
   const now = new Date(2026, 9, 23); // Fri Oct 23
