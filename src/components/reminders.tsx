@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { dayKey, isDueOn } from "@/lib/schedule";
-import { doseOn } from "@/lib/titration";
+import { doseOn, steppedOn } from "@/lib/titration";
 
 export const REMINDERS_KEY = "titrate.reminders";
 
@@ -34,8 +34,9 @@ export function Reminders() {
         const key = `titrate.notified.${c.id}.${dayKey(now)}`;
         if (localStorage.getItem(key)) continue;
         localStorage.setItem(key, "1");
-        reg.showNotification(`${c.name} is due`, {
-          body: `${doseOn(c, now)} ${c.unit} — tap to log`,
+        const step = steppedOn(c, now);
+        reg.showNotification(`${c.name} is due${step ? " — new dose" : ""}`, {
+          body: `${doseOn(c, now)} ${c.unit} — ${step ? "this step starts today, tap to log" : "tap to log"}`,
           tag: c.id,
           icon: "/icon-192.png",
           badge: "/icon-192.png",

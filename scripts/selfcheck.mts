@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { reconstitute, unitsForDose, formatUnits, waterToFit } from "../src/lib/recon.ts";
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
 import { levelSeries, levelWord, levelNow } from "../src/lib/levels.ts";
+import { steppedOn } from "../src/lib/titration.ts";
 import { dosesIcs } from "../src/lib/ics.ts";
 import { dosesCsv } from "../src/lib/export.ts";
 import { parseLine, toLang } from "../src/lib/intent.ts";
@@ -258,4 +259,12 @@ test("the CSV quotes every field, sorts oldest first and marks skips", () => {
   assert.ok(lines[1].includes('"BPC-157, ""the good one"""'), "commas and quotes escaped");
   assert.ok(lines[3].endsWith('"yes"'), "a skipped dose is marked");
   assert.ok(!lines[1].includes('"yes"'));
+});
+
+test("a step-up day is flagged, a steady day is not", () => {
+  const c = compound({ dose: 5, unit: "mg", titration: [{ at: "2026-01-12", dose: 7.5 }] });
+  assert.equal(steppedOn(c, new Date(2026, 0, 11)), false);
+  assert.equal(steppedOn(c, new Date(2026, 0, 12)), true, "the day the step lands");
+  assert.equal(steppedOn(c, new Date(2026, 0, 13)), false, "only that one day");
+  assert.equal(steppedOn(compound(), new Date(2026, 0, 12)), false, "no plan, no flag");
 });
