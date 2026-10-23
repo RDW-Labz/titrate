@@ -4,6 +4,7 @@ import { reconstitute, unitsForDose, formatUnits, waterToFit } from "../src/lib/
 import { levelAt, decayLevel } from "../src/lib/pk.ts";
 import { levelSeries, levelWord, levelNow } from "../src/lib/levels.ts";
 import { steppedOn } from "../src/lib/titration.ts";
+import { adherencePct } from "../src/lib/adherence.ts";
 import { dosesIcs } from "../src/lib/ics.ts";
 import { dosesCsv } from "../src/lib/export.ts";
 import { parseLine, toLang } from "../src/lib/intent.ts";
@@ -267,4 +268,28 @@ test("a step-up day is flagged, a steady day is not", () => {
   assert.equal(steppedOn(c, new Date(2026, 0, 12)), true, "the day the step lands");
   assert.equal(steppedOn(c, new Date(2026, 0, 13)), false, "only that one day");
   assert.equal(steppedOn(compound(), new Date(2026, 0, 12)), false, "no plan, no flag");
+});
+
+test("adherence counts logged days only, and skips are not logged", () => {
+  // started ten days before "now", so the 28-day window holds exactly those ten due days
+  const c = compound({ startDate: "2026-01-01" });
+  const now = new Date(2026, 0, 10);
+  const every = Array.from({ length: 10 }, (_, i) => log(new Date(2026, 0, 1 + i)));
+  assert.equal(adherencePct(c, every, now), 100);
+
+  const half = every.slice(0, 5);
+  assert.equal(adherencePct(c, half, now), Math.round((5 / 10) * 100));
+
+  const withSkip = [
+    ...every.slice(0, 4),
+    { id: "s", compoundId: "c1", at: new Date(2026, 0, 5).toISOString(), dose: 250, unit: "mcg" as const, skipped: true },
+  ];
+  assert.equal(adherencePct(c, withSkip, now), 40, "a skipped day is missing, not taken");
+
+  // a compound that starts today has one due day, not 28
+  const fresh = compound({ startDate: "2026-01-10" });
+  assert.equal(adherencePct(fresh, [log(now)], now), 100);
+  // off-cycle: nothing due in the window
+  const off = compound({ startDate: "2025-12-01", cycle: { onDays: 5, offDays: 200 } });
+  assert.equal(adherencePct(off, [], new Date(2026, 0, 10)), null);
 });

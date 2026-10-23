@@ -12,19 +12,6 @@ import { PEPTIDE_BY_ID, PEPTIDES, halfLifeLabel } from "@/lib/peptides";
 import { CATEGORY_DOT } from "@/lib/category-color";
 import type { Compound } from "@/lib/types";
 
-function adherence(c: Compound, doses: ReturnType<typeof useStore>["doses"], now: Date) {
-  let due = 0;
-  let logged = 0;
-  for (let i = 0; i < 28; i++) {
-    const day = addDays(now, -i);
-    if (scheduledOn(c, day) && inCycle(c, day)) {
-      due++;
-      if (loggedOn(doses, c.id, day)) logged++;
-    }
-  }
-  return due ? Math.round((logged / due) * 100) : null;
-}
-
 /** tiny 28-day adherence donut */
 function AdherenceDot({ pct }: { pct: number | null }) {
   if (pct === null) return null;
@@ -144,7 +131,7 @@ export default function PeptidesPage() {
             const due = isDueOn(c, doses, now);
             const cycle = cycleInfo(c, now);
             const next = nextDue(c, doses, now);
-            const pct = adherence(c, doses, now);
+            const pct = adherencePct(c, doses, now);
             return (
               <li
                 key={c.id}
