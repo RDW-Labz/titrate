@@ -13,24 +13,21 @@ const SNOOZE_DAYS = 7;
  */
 export function BackupNudge() {
   const { compounds, doses } = useStore();
-  const [last, setLast] = useState<number | null>(null);
-  const [snoozed, setSnoozed] = useState<number | null>(null);
-  const [ready, setReady] = useState(false);
+  // resolved once on mount: the clock and localStorage are outside React, so this is not derived state
+  const [title, setTitle] = useState<string | null>(null);
 
   useEffect(() => {
-    const stamp = Number(localStorage.getItem(BACKUP_KEY)) || null;
-    const until = Number(localStorage.getItem(BACKUP_SNOOZE)) || null;
-    setLast(stamp);
-    setSnoozed(until);
-    setReady(true);
+    const last = Number(localStorage.getItem(BACKUP_KEY)) || null;
+    const snoozed = Number(localStorage.getItem(BACKUP_SNOOZE)) || null;
+    if (backupDue(last, Date.now(), snoozed)) setTitle(last === null ? "No backup yet" : `Backup ${backupAge(last)}`);
   }, []);
 
-  if (!ready || (!compounds.length && !doses.length) || !backupDue(last, Date.now(), snoozed)) return null;
+  if (!title || (!compounds.length && !doses.length)) return null;
 
   return (
     <div className="enter mt-3 flex items-center gap-3 rounded-[22px] bg-card px-4 py-3 shadow-card">
       <div className="min-w-0 flex-1">
-        <p className="text-[13.5px] font-semibold">{last === null ? "No backup yet" : `Backup ${backupAge(last)}`}</p>
+        <p className="text-[13.5px] font-semibold">{title}</p>
         <p className="text-[12px] text-muted">This device is the only copy.</p>
       </div>
       <Link href="/settings" className="press rounded-full bg-accent-soft px-3 py-2 text-[13px] font-semibold text-accent">
@@ -40,7 +37,7 @@ export function BackupNudge() {
         className="press px-1 text-[12.5px] text-muted"
         onClick={() => {
           localStorage.setItem(BACKUP_SNOOZE, String(Date.now() + SNOOZE_DAYS * 86_400_000));
-          setSnoozed(Date.now() + SNOOZE_DAYS * 86_400_000);
+          setTitle(null);
         }}
       >
         Later

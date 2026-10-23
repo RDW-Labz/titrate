@@ -10,10 +10,19 @@ import { dosesCsv } from "../src/lib/export.ts";
 import { parseLine, toLang } from "../src/lib/intent.ts";
 import { weightVsSteps } from "../src/lib/progress.ts";
 import { backupDue } from "../src/lib/backup.ts";
+import { sum } from "../src/lib/num.ts";
 import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
 const hours = (h: number) => h * 3_600_000;
+
+test("totals read as the numbers typed, not their binary remainder", () => {
+  assert.equal(sum([0.1, 0.2]), 0.3);
+  assert.equal(sum([190, 520, 120]), 830);
+  assert.equal(sum([12.5, 7.25, 0.1]), 19.9); // 19.85 + noise, to one place
+  assert.equal(sum([]), 0);
+  assert.equal(String(sum([0.1, 0.2])), "0.3");
+});
 
 test("the backup nudge fires on a missing or stale backup, and a snooze always wins", () => {
   const now = Date.UTC(2026, 9, 23);

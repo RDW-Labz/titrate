@@ -8,6 +8,7 @@ import { LevelChart } from "@/components/level-chart";
 import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
 import { Btn, CountdownRing, Empty, useDialog, usePresence } from "@/components/ui";
 import { toast } from "@/components/toast";
+import { sum } from "@/lib/num";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
 import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
 import { budDaysLeft } from "@/lib/vial";
@@ -106,8 +107,8 @@ export default function TodayPage() {
 
   const todayFood = foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now));
   const todaySymptoms = symptoms.filter((x) => dayKey(new Date(x.at)) === dayKey(now));
-  const kcal = todayFood.reduce((n, f) => n + f.kcal, 0);
-  const protein = todayFood.reduce((n, f) => n + f.p, 0);
+  const kcal = sum(todayFood.map((f) => f.kcal));
+  const protein = sum(todayFood.map((f) => f.p));
 
   return (
     <div className="pt-3">

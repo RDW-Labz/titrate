@@ -6,6 +6,7 @@ import { useId, useState } from "react";
 import { Btn, Field, PageTitle, Ring } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { Disclosure } from "@/components/disclosure";
+import { sum } from "@/lib/num";
 import { addDays, dayKey } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 
@@ -67,13 +68,13 @@ export default function FoodPage() {
       ? new Date()
       : new Date(day.getFullYear(), day.getMonth(), day.getDate(), now.getHours(), now.getMinutes());
 
-  const kcal = dayFood.reduce((n, f) => n + f.kcal, 0);
-  const protein = dayFood.reduce((n, f) => n + f.p, 0);
-  const fiber = dayFood.reduce((n, f) => n + f.fiber, 0);
+  const kcal = sum(dayFood.map((f) => f.kcal));
+  const protein = sum(dayFood.map((f) => f.p));
+  const fiber = sum(dayFood.map((f) => f.fiber), 2);
   // shortcut: 250 mL glasses against a fixed 8-glass goal; add a goal field when someone asks
   const GLASS = 250;
   const dayWater = waters.filter((w) => dayKey(new Date(w.at)) === key);
-  const ml = dayWater.reduce((n, w) => n + w.ml, 0);
+  const ml = sum(dayWater.map((w) => w.ml));
   const glasses = Math.floor(ml / GLASS);
   const sorted = [...weights].sort((a, b) => a.at.localeCompare(b.at));
   const latest = sorted[sorted.length - 1];
@@ -197,7 +198,7 @@ export default function FoodPage() {
         >
           <span className="text-[15px] font-medium">Copy the day before</span>
           <span className="num block text-[12.5px] text-muted">
-            {prevFood.length} {prevFood.length === 1 ? "entry" : "entries"} · {prevFood.reduce((n, f) => n + f.kcal, 0)} kcal
+            {prevFood.length} {prevFood.length === 1 ? "entry" : "entries"} · {sum(prevFood.map((f) => f.kcal))} kcal
           </span>
         </button>
       ) : null}

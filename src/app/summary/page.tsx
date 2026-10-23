@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Btn } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { doseOn } from "@/lib/titration";
+import { sum } from "@/lib/num";
 import { addDays, cycleInfo, dayKey, inCycle, loggedOn, scheduledOn } from "@/lib/schedule";
 import { useStore } from "@/lib/store";
 import { budDaysLeft, beyondUseDate, scheduleLabel, vialStatus } from "@/lib/vial";
@@ -41,9 +42,9 @@ export default function SummaryPage() {
   const latestW = sortedW[sortedW.length - 1];
   const deltaW = latestW && sortedW[0] ? Math.round((latestW.lb - sortedW[0].lb) * 10) / 10 : null;
 
-  const protein = foods
-    .filter((f) => dayKey(new Date(f.at)) === dayKey(now))
-    .reduce((n, f) => n + f.p, 0);
+  const protein = sum(
+    foods.filter((f) => dayKey(new Date(f.at)) === dayKey(now)).map((f) => f.p),
+  );
 
   return (
     <div className="pt-3">

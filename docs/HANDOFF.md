@@ -53,6 +53,8 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
   so one dose peaks at 100 %; the chart projects scheduled doses forward as a dashed tail.
 - **Schedule/cycle/titration**: due = `scheduledOn && inCycle && no entry that day`; a *skipped* entry
   satisfies the day but never counts as taken. Dose in force = latest titration step on or before the day.
+- **Totals**: never `reduce((n, f) => n + f.kcal, 0)` straight into the UI — `sum()` in `src/lib/num.ts` trims the
+  float remainder, so two 0.1 g entries read 0.2 g and not 0.20000000000000004. Tested in `selfcheck.mts`.
 - **Adherence**: 28-day window, skips count as missing. Tested in `src/lib/adherence.ts`.
 - **Weight vs dose**: `weightVsSteps()` in `src/lib/progress.ts` puts weights and titration steps on one 0..1
   axis over a trailing 90-day window, so the chart on a compound page shows a plateau against the step that
