@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, type ReactNode } from "react";
+import { Suspense, useEffect, type ReactNode } from "react";
 import { BookIcon, ForkIcon, HomeIcon, SyringeIcon, VialIcon } from "./icons";
 import { ToastHost } from "./toast";
 import { PageFade } from "./page-fade";
@@ -58,6 +58,12 @@ function TabBar() {
 
 export function Shell({ children }: { children: ReactNode }) {
   const ready = useReady();
+  // the offline shell; Reminders also waits on navigator.serviceWorker.ready, so this wakes that up too
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") {
+      navigator.serviceWorker?.register(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/sw.js`).catch(() => undefined);
+    }
+  }, []);
   // the store only exists in the browser; rendering pages before it loads would prerender
   // an empty protocol (and trip Next's new Date() check), so hold children until mounted
   return (

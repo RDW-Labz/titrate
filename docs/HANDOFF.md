@@ -73,6 +73,9 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
   "force-static"` on `manifest.ts` before it will build.
 - **basePath is not applied to strings in `manifest.ts` or `metadata.icons`** — they are prefixed by hand from
   `NEXT_PUBLIC_BASE_PATH`; forget it and install points at the org root.
+- The service worker only registers in a production build, so a `pnpm dev` tab never caches. Testing offline
+  needs the built `out/` (or the live site) plus CDP `Network.emulateNetworkConditions`; `js()` runs in an
+  isolated world where `navigator.serviceWorker` and `caches` are undefined, so read results through the DOM.
 - A **private** repo makes Pages org-login-only (`github.com/pages/auth` redirect) and serves it at the domain
   ROOT, not `/<repo>` — which silently breaks a `/titrate` build. Public repo → `rdw-labz.github.io/titrate`.
 - Accessible contrast: accent `#0d7460` (was `#0e7c66`, 4.41 on accent-soft). All screens ≥ AA now.
@@ -83,6 +86,13 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
    fetch that returns OpenUI Lang is the whole change. Needs an API key + a route (breaks the no-server rule).
 2. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
    shell). Manifest shortcuts + calendar export are the web substitutes already shipped.
+
+Done: **offline shell** — `public/sw.js` is registered by `Shell` (production only). It precaches the 14 pages
+plus icons at install, serves HTML network-first (so a deploy can't go stale) and hashed `_next/static` chunks
+cache-first, and matches navigations with `ignoreSearch` so `/protocols/view/?id=` works offline. Verified by
+cutting the network in CDP and loading home, calc, a library entry and a protocol deep link. Bump `CACHE` in
+`sw.js` only when a release must not run from cache at all. This also makes `navigator.serviceWorker.ready`
+resolve, which is what `Reminders` was waiting on — notifications now actually fire where permission is granted.
 
 Done: **deploy** — repo is public, Pages is live at https://rdw-labz.github.io/titrate/, workflow
 `.github/workflows/pages.yml` (pnpm 12, Node 24, `pnpm test` before build). Verify a deploy by loading the live

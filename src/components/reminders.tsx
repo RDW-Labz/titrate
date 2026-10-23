@@ -38,8 +38,8 @@ export function Reminders() {
         reg.showNotification(`${c.name} is due${step ? " — new dose" : ""}`, {
           body: `${doseOn(c, now)} ${c.unit} — ${step ? "this step starts today, tap to log" : "tap to log"}`,
           tag: c.id,
-          icon: "/icon-192.png",
-          badge: "/icon-192.png",
+          icon: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-192.png`,
+          badge: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-192.png`,
         });
       }
     };
