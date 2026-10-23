@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Btn, PageTitle, useDialog } from "@/components/ui";
+import { Btn, PageTitle, useDialog, usePresence } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { addPhoto, deletePhoto, listPhotos, shrink, type Photo } from "@/lib/photos";
 
@@ -10,6 +10,7 @@ export default function PhotosPage() {
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const panel = useDialog(open !== null, () => setOpen(null));
+  const { shown: viewerShown, leaving: viewerLeaving } = usePresence(open !== null);
 
   useEffect(() => {
     listPhotos()
@@ -79,11 +80,11 @@ export default function PhotosPage() {
         </label>
       </div>
 
-      {open ? (
+      {open || viewerShown ? (
         <div
           ref={panel}
           tabIndex={-1}
-          className="fixed inset-0 z-40 flex flex-col bg-ink/90 p-4 outline-none"
+          className={`${viewerLeaving ? "photo-out" : "photo-in"} fixed inset-0 z-40 flex flex-col bg-ink/90 p-4 outline-none`}
           role="dialog"
           aria-modal="true"
           aria-label="Photo"
@@ -102,6 +103,7 @@ export default function PhotosPage() {
             variant="line"
             className="mt-3 !border-white/30 !text-white"
             onClick={async () => {
+              if (!open) return;
               const gone = photos?.find((p) => p.id === open);
               await deletePhoto(open);
               setPhotos(await listPhotos());

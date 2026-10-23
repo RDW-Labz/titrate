@@ -125,6 +125,23 @@ export function useIdParam(): string {
   return useSearchParams().get("id") ?? "";
 }
 
+/**
+ * Keeps an overlay mounted for `ms` after `open` turns false so it can animate out. Returns whether it should
+ * render and whether that render is the exit, so the caller picks sheet-in or sheet-out from one flag.
+ */
+export function usePresence(open: boolean, ms = 180): { shown: boolean; leaving: boolean } {
+  const [shown, setShown] = useState(open);
+  useEffect(() => {
+    if (open) {
+      setShown(true);
+      return;
+    }
+    const t = setTimeout(() => setShown(false), ms);
+    return () => clearTimeout(t);
+  }, [open, ms]);
+  return { shown: shown || open, leaving: !open && shown };
+}
+
 /** keeps Tab inside an open overlay, closes on Escape, hands focus back to the trigger */
 export function useDialog(open: boolean, onClose: () => void) {
   const panel = useRef<HTMLDivElement>(null);

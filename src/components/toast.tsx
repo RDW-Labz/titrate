@@ -24,9 +24,20 @@ export function toast(message: string, action?: { label: string; run: () => void
 
 export function ToastHost() {
   const [t, setT] = useState<Toast | null>(current);
+  // a toast leaving keeps its node for one short animation instead of blinking out mid-read
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    const update = () => setT(current);
+    const update = () => {
+      if (current) {
+        setT(current);
+        setLeaving(false);
+      } else {
+        // deterministic, not animationend: a throttled or interrupted animation must not strand a toast
+        setLeaving(true);
+        setTimeout(() => setT(null), 200);
+      }
+    };
     subs.add(update);
     return () => {
       subs.delete(update);
@@ -39,7 +50,7 @@ export function ToastHost() {
     <div
       role="status"
       aria-live="polite"
-      className="toast-in fixed bottom-[104px] left-1/2 z-20 flex w-[calc(100%-40px)] max-w-[400px] -translate-x-1/2 items-center justify-between gap-3 rounded-full bg-hero px-4 py-2.5 text-white shadow-float"
+      className={`${leaving ? "toast-out" : "toast-in"} fixed bottom-[104px] left-1/2 z-20 flex w-[calc(100%-40px)] max-w-[400px] -translate-x-1/2 items-center justify-between gap-3 rounded-full bg-hero px-4 py-2.5 text-white shadow-float`}
     >
       <span className="truncate text-[13.5px] font-medium">{t.message}</span>
       {t.action ? (

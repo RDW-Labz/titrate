@@ -249,6 +249,73 @@ a:focus-visible {
   animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+/* exits are short on purpose: long enough to read as a movement, short enough not to feel slow */
+@keyframes sheet-down {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+.sheet-out {
+  animation: sheet-down 0.18s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.97);
+  }
+}
+
+.toast-out {
+  animation: toast-out 0.16s ease-in both;
+}
+
+@keyframes veil-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.veil-in {
+  animation: veil-in 0.22s ease-out both;
+}
+
+.veil-out {
+  animation: veil-in 0.18s ease-in reverse both;
+}
+
+@keyframes photo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.photo-in {
+  animation: photo-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.photo-out {
+  animation: photo-in 0.16s ease-in reverse both;
+}
+
 .scroll-hide::-webkit-scrollbar {
   display: none;
 }

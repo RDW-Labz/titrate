@@ -22,7 +22,7 @@ function Peptide() {
       <div className="pt-6">
         <PageTitle>Not in the library</PageTitle>
         <Link href="/library" className="text-[13px] text-accent">
-          ← Back to library
+          ‹ Library
         </Link>
       </div>
     );
@@ -31,7 +31,7 @@ function Peptide() {
   return (
     <div>
       <Link href="/library" className="press inline-block py-1.5 text-[12.5px] text-accent">
-        ← Library
+        ‹ Library
       </Link>
       <PageTitle meta={p.aka ?? CATEGORY_LABEL[p.category]}>{p.name}</PageTitle>
 

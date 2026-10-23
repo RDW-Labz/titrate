@@ -84,6 +84,10 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
   isolated world where `navigator.serviceWorker` and `caches` are undefined, so read results through the DOM.
 - A **private** repo makes Pages org-login-only (`github.com/pages/auth` redirect) and serves it at the domain
   ROOT, not `/<repo>` — which silently breaks a `/titrate` build. Public repo → `rdw-labz.github.io/titrate`.
+- **Motion**: entrances exist (`.enter`, `.page-in`, `.sheet-in`, `.toast-in`, `.chart-line`, `.tab-pop`); exits are
+  `.sheet-out` / `.photo-out` / `.toast-out` / `.veil-out`, driven by `usePresence(open)` in `ui.tsx`, which keeps
+  the overlay mounted for its 180 ms. Never hang cleanup on `animationend` — a throttled animation strands the
+  node; the toast uses a timeout for exactly that reason.
 - **Tap targets, not just contrast**: nothing is under 40 px except plain text links. Severity is one 44 px
   control that cycles (three 10 px dots were untappable), header icons are 21 px glyphs in a 45 px box, delete ✕
   is 44 px, and `Btn size="sm"` is 40 px tall.

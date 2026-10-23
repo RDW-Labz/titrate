@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDialog } from "@/components/ui";
+import { useDialog, usePresence } from "@/components/ui";
 
 type Pt = { name: string; x: number; y: number };
 
@@ -54,8 +54,9 @@ export function SitePicker({
 }) {
   const [side, setSide] = useState<"front" | "back">("front");
   const panel = useDialog(open, onClose);
+  const { shown, leaving } = usePresence(open);
 
-  if (!open) return null;
+  if (!shown) return null;
   const pts = side === "front" ? FRONT : BACK;
 
   return (
@@ -65,11 +66,16 @@ export function SitePicker({
       aria-modal="true"
       aria-label="Choose an injection site"
     >
-      <button className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" onClick={onClose} aria-label="Close" />
+      <button
+        className={`absolute inset-0 bg-ink/45 backdrop-blur-[2px] ${leaving ? "veil-out" : "veil-in"}`}
+        onClick={onClose}
+        aria-label="Close"
+        tabIndex={-1}
+      />
       <div
         ref={panel}
         tabIndex={-1}
-        className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))] outline-none"
+        className={`${leaving ? "sheet-out" : "sheet-in"} relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))] outline-none`}
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
         <div className="flex items-center justify-between">

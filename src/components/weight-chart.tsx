@@ -48,7 +48,16 @@ export function WeightChart({ data, unit }: { data: Progress; unit: string }) {
         ))}
 
         <path d={`${line} L${W},${H} L0,${H} Z`} fill={`url(#wg-${id})`} />
-        <path d={line} fill="none" stroke="var(--color-accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d={line}
+          pathLength={1}
+          className="chart-line"
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
         <circle cx={last[0]} cy={last[1]} r="3.5" fill="var(--color-accent)" />
       </svg>
 

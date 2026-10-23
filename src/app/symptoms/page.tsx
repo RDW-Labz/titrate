@@ -71,7 +71,10 @@ export default function SymptomsPage() {
                       >
                         <span className="flex gap-1" aria-hidden="true">
                           {[1, 2, 3].map((n) => (
-                            <span key={n} className={`size-2.5 rounded-full ${n <= s.severity ? "bg-warn" : "bg-line"}`} />
+                            <span
+                              key={n}
+                              className={`size-2.5 rounded-full transition-colors duration-200 ${n <= s.severity ? "bg-warn" : "bg-line"}`}
+                            />
                           ))}
                         </span>
                       </button>

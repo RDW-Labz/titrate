@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { GearIcon } from "@/components/icons";
 import { LevelChart } from "@/components/level-chart";
 import { LogAllButton, LogDoseButton, LogDot } from "@/components/log-dose";
-import { Btn, CountdownRing, Empty, useDialog } from "@/components/ui";
+import { Btn, CountdownRing, Empty, useDialog, usePresence } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { PEPTIDE_BY_ID } from "@/lib/peptides";
 import { dayKey, humanIn, isDueOn, lastDose, nextDoseMoment, timeTo } from "@/lib/schedule";
@@ -308,14 +308,20 @@ function SymptomSheet({
   onToggle: (name: string) => void;
 }) {
   const panel = useDialog(open, onClose);
-  if (!open) return null;
+  const { shown, leaving } = usePresence(open);
+  if (!shown) return null;
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Side effects">
-      <button className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" onClick={onClose} aria-label="Close" />
+      <button
+        className={`absolute inset-0 bg-ink/45 backdrop-blur-[2px] ${leaving ? "veil-out" : "veil-in"}`}
+        onClick={onClose}
+        aria-label="Close"
+        tabIndex={-1}
+      />
       <div
         ref={panel}
         tabIndex={-1}
-        className="sheet-in relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))] outline-none"
+        className={`${leaving ? "sheet-out" : "sheet-in"} relative w-full max-w-[460px] rounded-t-[28px] bg-card px-5 pt-3 pb-[max(18px,env(safe-area-inset-bottom))] outline-none`}
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
         <p className="text-[16px] font-semibold">Any side effects?</p>
@@ -341,7 +347,10 @@ function SymptomSheet({
                 {sev ? (
                   <span className="flex gap-0.5" aria-hidden="true">
                     {[1, 2, 3].map((n) => (
-                      <span key={n} className={`size-1 rounded-full ${n <= sev ? "bg-warn" : "bg-warn/25"}`} />
+                      <span
+                        key={n}
+                        className={`size-1 rounded-full transition-colors duration-200 ${n <= sev ? "bg-warn" : "bg-warn/25"}`}
+                      />
                     ))}
                   </span>
                 ) : null}
