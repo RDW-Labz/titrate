@@ -76,6 +76,9 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
   "force-static"` on `manifest.ts` before it will build.
 - **basePath is not applied to strings in `manifest.ts` or `metadata.icons`** — they are prefixed by hand from
   `NEXT_PUBLIC_BASE_PATH`; forget it and install points at the org root.
+- **A native `confirm()` cannot be driven from the browser harness** — it blocks both `Runtime.evaluate` and
+  `Input.dispatchMouseEvent` until dismissed, and the CDP session cannot reach `Page.handleJavaScriptDialog`
+  in time. Only the destructive paths behind `confirm()` need a human check.
 - The service worker only registers in a production build, so a `pnpm dev` tab never caches. Testing offline
   needs the built `out/` (or the live site) plus CDP `Network.emulateNetworkConditions`; `js()` runs in an
   isolated world where `navigator.serviceWorker` and `caches` are undefined, so read results through the DOM.
@@ -89,6 +92,12 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
    fetch that returns OpenUI Lang is the whole change. Needs an API key + a route (breaks the no-server rule).
 2. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
    shell). Manifest shortcuts + calendar export are the web substitutes already shipped.
+
+Done: **the backup is a real snapshot** — Download now appends the IndexedDB photos to the JSON (they were
+silently excluded, so a new phone lost every progress photo) and Restore refills them, skipping duplicates by
+data. "Delete everything" now clears photos too, and a deleted photo offers Undo on the toast instead of being
+irreversible on one tap. Verified by round-tripping through the real file input: download → wipe both stores →
+restore → photo back with its original date.
 
 Done: **weight against titration** — the compound page shows weight over 90 days with a dashed line at every
 dose change, plus the net change and the dose order in the footer. The demo's Tirzepatide now carries two

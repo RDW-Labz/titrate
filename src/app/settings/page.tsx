@@ -7,6 +7,7 @@ import { toast } from "@/components/toast";
 import { REMINDERS_KEY } from "@/components/reminders";
 import { EMPTY, actions, useStore } from "@/lib/store";
 import { dosesIcs } from "@/lib/ics";
+import { addPhoto, deletePhoto, listPhotos } from "@/lib/photos";
 import { dosesCsv } from "@/lib/export";
 import type { State } from "@/lib/types";
 
@@ -18,8 +19,14 @@ export default function SettingsPage() {
   const [perm, setPerm] = useState("default");
   const [on, setOn] = useState(false);
   const [kb, setKb] = useState("0");
+  const [photos, setPhotos] = useState(0);
   const [installed, setInstalled] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    listPhotos()
+      .then((p) => setPhotos(p.length))
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     setPerm(typeof Notification === "undefined" ? "unsupported" : Notification.permission);
@@ -32,11 +39,18 @@ export default function SettingsPage() {
     setInstalled(standalone);
   }, [state]);
 
-  function restore(raw: string | null, label: string) {
+  async function restore(raw: string | null, label: string) {
     if (!raw) return toast("Nothing saved yet");
     try {
-      const parsed = JSON.parse(raw) as Partial<State>;
-      actions.replace({ ...EMPTY, ...parsed, goals: { ...EMPTY.goals, ...parsed.goals } });
+      const parsed = JSON.parse(raw) as Partial<State> & { photos?: { at: string; data: string }[] };
+      const { photos, ...state } = parsed;
+      actions.replace({ ...EMPTY, ...state, goals: { ...EMPTY.goals, ...parsed.goals } });
+      if (photos?.length) {
+        const have = new Set((await listPhotos()).map((p) => p.data));
+        const fresh = photos.filter((p) => !have.has(p.data));
+        await Promise.all(fresh.map((p) => addPhoto(p.data, new Date(p.at)).catch(() => "")));
+        setPhotos((n) => n + fresh.length);
+      }
       toast(`Restored ${label}`);
     } catch {
       toast("That file didn't open");
@@ -93,14 +107,23 @@ export default function SettingsPage() {
           <Btn
             size="sm"
             variant="quiet"
-            onClick={() => {
-              const url = URL.createObjectURL(new Blob([localStorage.getItem(KEY) ?? "{}"], { type: "application/json" }));
+            onClick={async () => {
+              const shots = await listPhotos().catch(() => []);
+              let body = localStorage.getItem(KEY) ?? "{}";
+              if (shots.length) {
+                try {
+                  body = JSON.stringify({ ...JSON.parse(body), photos: shots.map(({ at, data }) => ({ at, data })) });
+                } catch {
+                  // a damaged store still exports what it has
+                }
+              }
+              const url = URL.createObjectURL(new Blob([body], { type: "application/json" }));
               const a = document.createElement("a");
               a.href = url;
               a.download = `titrate-${new Date().toISOString().slice(0, 10)}.json`;
               a.click();
               URL.revokeObjectURL(url);
-              toast("Saved a copy");
+              toast(shots.length ? `Saved a copy with ${shots.length} photos` : "Saved a copy");
             }}
           >
             Download
@@ -159,6 +182,7 @@ export default function SettingsPage() {
         </div>
         <p className="num mt-1 text-[12px] text-muted">
           {state.compounds.length} peptides · {state.doses.length} doses · {kb} KB on this device
+          {photos ? ` · ${photos} photo${photos === 1 ? "" : "s"}` : ""}
           <br />
           Calendar exports the next 8 weeks as .ics — Apple and Google Calendar both read it.
         </p>
@@ -212,11 +236,13 @@ export default function SettingsPage() {
             size="sm"
             variant="line"
             className="!text-alert"
-            onClick={() => {
-              if (confirm("Delete everything on this device?")) {
-                actions.reset();
-                toast("Deleted — undo is under Backup");
-              }
+            onClick={async () => {
+              if (!confirm("Delete everything on this device?")) return;
+              const shots = await listPhotos().catch(() => []);
+              await Promise.all(shots.map((p) => deletePhoto(p.id).catch(() => undefined)));
+              actions.reset();
+              setPhotos(0);
+              toast(shots.length ? "Deleted — the photos are gone for good" : "Deleted — undo is under Backup");
             }}
           >
             Delete everything

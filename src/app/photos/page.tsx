@@ -102,9 +102,18 @@ export default function PhotosPage() {
             variant="line"
             className="mt-3 !border-white/30 !text-white"
             onClick={async () => {
+              const gone = photos?.find((p) => p.id === open);
               await deletePhoto(open);
               setPhotos(await listPhotos());
               setOpen(null);
+              if (!gone) return;
+              toast("Photo deleted", {
+                label: "Undo",
+                run: async () => {
+                  await addPhoto(gone.data, new Date(gone.at));
+                  setPhotos(await listPhotos());
+                },
+              });
             }}
           >
             Delete this photo
