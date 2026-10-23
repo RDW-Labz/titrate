@@ -1,13 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { Card, LinkBtn, PageTitle, Pill, SectionHead, Stat } from "@/components/ui";
+import { Suspense } from "react";
+import { Card, LinkBtn, PageTitle, Pill, SectionHead, Stat, useIdParam } from "@/components/ui";
 import { CATEGORY_LABEL, PEPTIDE_BY_ID, halfLifeLabel } from "@/lib/peptides";
 
+// Suspense is what lets useSearchParams prerender in a static export
 export default function PeptidePage() {
-  const { id } = useParams<{ id: string }>();
-  const p = PEPTIDE_BY_ID.get(id);
+  return (
+    <Suspense fallback={null}>
+      <Peptide />
+    </Suspense>
+  );
+}
+
+function Peptide() {
+  const p = PEPTIDE_BY_ID.get(useIdParam());
 
   if (!p) {
     return (

@@ -222,7 +222,7 @@ export default function TodayPage() {
               className="enter flex items-center gap-3 rounded-[22px] bg-card px-4 py-3.5 shadow-card"
               style={{ animationDelay: `${90 + i * 50}ms` }}
             >
-              <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
+              <Link href={`/protocols/view?id=${c.id}`} className="min-w-0 flex-1">
                 <p className="truncate text-[16px] font-medium">{c.name}</p>
                 <p className="num text-[12.5px] text-muted">
                   {doseOn(c, now)} {c.unit} · {due ? "due today" : next ? humanIn(next.at, now) : "off cycle"}

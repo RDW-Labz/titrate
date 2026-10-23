@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
 import { LevelChart } from "@/components/level-chart";
 import { LogDoseButton } from "@/components/log-dose";
 import { ReconCalculator } from "@/components/recon-calculator";
 import { Disclosure } from "@/components/disclosure";
 import { toast } from "@/components/toast";
-import { Btn, Field, PageTitle } from "@/components/ui";
+import { Btn, Field, PageTitle, useIdParam } from "@/components/ui";
 import { levelNow, levelSeries, levelWord } from "@/lib/levels";
 import { dayKey, cycleInfo, humanIn, isDueOn, nextDue } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
@@ -18,8 +18,17 @@ import { budDaysLeft, scheduleLabel, useByDate, vialStatus } from "@/lib/vial";
 
 const localInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 
+// Suspense is what lets useSearchParams prerender in a static export
 export default function ProtocolDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  return (
+    <Suspense fallback={null}>
+      <Protocol />
+    </Suspense>
+  );
+}
+
+function Protocol() {
+  const id = useIdParam();
   const router = useRouter();
   const { compounds, doses, vials } = useStore();
   const now = new Date();

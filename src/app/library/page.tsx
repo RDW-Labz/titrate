@@ -28,7 +28,7 @@ export default function LibraryPage() {
       <ul className="mt-3 divide-y divide-line rounded-[24px] bg-card shadow-card">
         {list.map((p, i) => (
           <li key={p.id} className="enter" style={{ animationDelay: `${Math.min(i, 8) * 30}ms` }}>
-            <Link href={`/library/${p.id}`} className="press flex items-center gap-3 px-4 py-3.5">
+            <Link href={`/library/view?id=${p.id}`} className="press flex items-center gap-3 px-4 py-3.5">
               <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${CATEGORY_DOT[p.category]}`} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[16px] font-medium">{p.name}</span>

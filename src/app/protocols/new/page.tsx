@@ -153,7 +153,7 @@ function NewProtocol() {
             actions.updateCompound(compound.id, { vialId: vial.id });
           }
           toast(`${peptide.name} added`);
-          router.push(`/protocols/${compound.id}`);
+          router.push(`/protocols/view?id=${compound.id}`);
         }}
       >
         Start tracking

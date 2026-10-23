@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     "Dose and cycle tracking, reconstitution math, estimated level curves and GLP-1 nutrition in one place.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Titrate" },
-  icons: { icon: "/icon-192.png", apple: "/icon-180.png" },
+  icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-192.png`, apple: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-180.png` },
 };
 
 export const viewport: Viewport = { themeColor: "#edf1f5" };

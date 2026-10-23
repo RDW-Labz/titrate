@@ -139,7 +139,7 @@ export default function PeptidesPage() {
                 className="enter flex items-center gap-3 rounded-[22px] bg-card px-4 py-3.5 shadow-card"
                 style={{ animationDelay: `${i * 45}ms` }}
               >
-                <Link href={`/protocols/${c.id}`} className="flex min-w-0 flex-1 items-center gap-2.5">
+                <Link href={`/protocols/view?id=${c.id}`} className="flex min-w-0 flex-1 items-center gap-2.5">
                   <span
                     aria-hidden="true"
                     className={`size-2 shrink-0 rounded-full ${CATEGORY_DOT[PEPTIDE_BY_ID.get(c.peptideId)?.category ?? "other"]}`}
@@ -194,7 +194,7 @@ export default function PeptidesPage() {
           <ul className="mt-2 divide-y divide-line overflow-hidden rounded-[22px] bg-card shadow-card">
             {libraryHits.map((p) => (
               <li key={p.id} className="flex items-center gap-3 px-4 py-3">
-                <Link href={`/library/${p.id}`} className="min-w-0 flex-1">
+                <Link href={`/library/view?id=${p.id}`} className="min-w-0 flex-1">
                   <p className="truncate text-[15px] font-medium">{p.name}</p>
                   <p className="num text-[12px] text-muted">
                     t½ {halfLifeLabel(p.halfLifeH)} · {p.range[0]}–{p.range[1]} {p.unit}
@@ -224,7 +224,7 @@ export default function PeptidesPage() {
             <ul className="mt-2 space-y-2">
               {archived.map((c) => (
                 <li key={c.id} className="flex items-center gap-3 rounded-[22px] bg-card/70 px-4 py-3 shadow-card">
-                  <Link href={`/protocols/${c.id}`} className="min-w-0 flex-1">
+                  <Link href={`/protocols/view?id=${c.id}`} className="min-w-0 flex-1">
                     <p className="truncate text-[15px] font-medium text-muted">{c.name}</p>
                     <p className="num text-[12px] text-muted">
                       archived · {doses.filter((d) => d.compoundId === c.id && !d.skipped).length} doses kept

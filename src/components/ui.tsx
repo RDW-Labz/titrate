@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
 
 export function Card({
@@ -117,6 +118,11 @@ export function Pill({
       {children}
     </span>
   );
+}
+
+/** the ?id= of a static-export page — there is no server to read the path, so it rides in the query */
+export function useIdParam(): string {
+  return useSearchParams().get("id") ?? "";
 }
 
 /** keeps Tab inside an open overlay, closes on Escape, hands focus back to the trigger */
