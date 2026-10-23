@@ -32,7 +32,7 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
 |---|---|
 | `/` | Hero: countdown ring, level mini-curve, one-tap Log (locks after the dose), site link, skip, week dots, other compounds, log-all, protein, "Any side effects?" sheet |
 | `/protocols` | Your compounds: search (stack + library + screens), 28-day adherence donut, archive toggle |
-| `/protocols/view?id=` | Level chart with 7-day projection, Log, cycle bar; vial, dose, schedule, history behind one More |
+| `/protocols/view?id=` | Level chart with 7-day projection, Log, cycle bar; weight vs dose steps; vial, dose, schedule, history behind one More |
 | `/protocols/new?p=` | Prefilled setup, one tap to create |
 | `/start` | First run: GLP-1 pen vs mixing your own vial |
 | `/calc` | Reconstitution: vial + water + dose + syringe → units, barrel drawn to scale |
@@ -54,6 +54,9 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
 - **Schedule/cycle/titration**: due = `scheduledOn && inCycle && no entry that day`; a *skipped* entry
   satisfies the day but never counts as taken. Dose in force = latest titration step on or before the day.
 - **Adherence**: 28-day window, skips count as missing. Tested in `src/lib/adherence.ts`.
+- **Weight vs dose**: `weightVsSteps()` in `src/lib/progress.ts` puts weights and titration steps on one 0..1
+  axis over a trailing 90-day window, so the chart on a compound page shows a plateau against the step that
+  caused it. Tested in `selfcheck.mts`; `src/components/weight-chart.tsx` is the drawing only.
 
 ## Traps already paid for
 
@@ -86,6 +89,10 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
    fetch that returns OpenUI Lang is the whole change. Needs an API key + a route (breaks the no-server rule).
 2. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
    shell). Manifest shortcuts + calendar export are the web substitutes already shipped.
+
+Done: **weight against titration** — the compound page shows weight over 90 days with a dashed line at every
+dose change, plus the net change and the dose order in the footer. The demo's Tirzepatide now carries two
+titration steps (2.5 → 5 mg) so the feature is visible in the sample.
 
 Done: **overlay lock + update prompt** — an open overlay now freezes the page behind it (lock on
 `documentElement`, not `body`: body alone still lets the window scroll) and a swapped service worker raises a

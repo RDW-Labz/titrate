@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { LevelChart } from "@/components/level-chart";
+import { WeightChart } from "@/components/weight-chart";
 import { LogDoseButton } from "@/components/log-dose";
 import { ReconCalculator } from "@/components/recon-calculator";
 import { Disclosure } from "@/components/disclosure";
 import { toast } from "@/components/toast";
 import { Btn, Field, PageTitle, useIdParam } from "@/components/ui";
 import { levelNow, levelSeries, levelWord } from "@/lib/levels";
+import { weightVsSteps } from "@/lib/progress";
 import { dayKey, cycleInfo, humanIn, isDueOn, nextDue } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 import { doseOn, nextStep } from "@/lib/titration";
@@ -30,7 +32,7 @@ export default function ProtocolDetailPage() {
 function Protocol() {
   const id = useIdParam();
   const router = useRouter();
-  const { compounds, doses, vials } = useStore();
+  const { compounds, doses, vials, weights } = useStore();
   const now = new Date();
   const [doseDraft, setDoseDraft] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
@@ -63,6 +65,7 @@ function Protocol() {
   const inForce = doseOn(compound, now);
   const step = nextStep(compound, now);
   const steps = [...(compound.titration ?? [])].sort((a, b) => a.at.localeCompare(b.at));
+  const progress = weightVsSteps(weights, compound.titration ?? [], now);
   const history = doses
     .filter((d) => d.compoundId === compound.id)
     .sort((a, b) => +new Date(b.at) - +new Date(a.at))
@@ -117,6 +120,21 @@ function Protocol() {
           </div>
         ) : null}
       </section>
+
+      {progress ? (
+        <section className="enter mt-3 rounded-[24px] bg-card px-4 py-4 shadow-card">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[13.5px] font-semibold">Weight · 90 days</p>
+            <p className="num text-[12.5px] text-muted">
+              {progress.change > 0 ? "+" : ""}
+              {progress.change} lb
+            </p>
+          </div>
+          <div className="mt-2">
+            <WeightChart data={progress} unit={compound.unit} />
+          </div>
+        </section>
+      ) : null}
 
       <Disclosure
         className="mt-3"

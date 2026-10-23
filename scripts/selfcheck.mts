@@ -8,10 +8,44 @@ import { adherencePct } from "../src/lib/adherence.ts";
 import { dosesIcs } from "../src/lib/ics.ts";
 import { dosesCsv } from "../src/lib/export.ts";
 import { parseLine, toLang } from "../src/lib/intent.ts";
+import { weightVsSteps } from "../src/lib/progress.ts";
 import { cycleInfo, isDueOn, nextDue, suggestSite, streak, dayKey, doseOnAt, addDays, daysBetween, anyLogOn, skippedOn } from "../src/lib/schedule.ts";
 import type { Compound, DoseLog } from "../src/lib/types.ts";
 
 const hours = (h: number) => h * 3_600_000;
+
+test("weight and dose steps share one 90-day axis, and old entries fall off it", () => {
+  const now = new Date(2026, 9, 23); // Fri Oct 23
+  const at = (daysAgo: number) => {
+    const d = new Date(2026, 9, 23 - daysAgo);
+    return d.toISOString().slice(0, 10);
+  };
+  const weights = [
+    { at: at(120), lb: 240 }, // outside the window
+    { at: at(60), lb: 220 },
+    { at: at(30), lb: 212 },
+    { at: at(0), lb: 206 },
+  ];
+  const p = weightVsSteps(weights, [{ at: at(45), dose: 2.5 }, { at: at(15), dose: 5 }, { at: at(200), dose: 1 }], now)!;
+
+  assert.equal(p.points.length, 3);
+  assert.equal(p.min, 206);
+  assert.equal(p.max, 220);
+  assert.equal(p.change, -14);
+  // 60 days ago is a third of the way in, today is the right edge
+  assert.equal(Math.round(p.points[0].x * 90), 30);
+  assert.equal(Math.round(p.points[2].x * 90), 90);
+  // only the two steps inside the window survive, in date order
+  assert.deepEqual(p.marks.map((m) => m.dose), [2.5, 5]);
+  assert.ok(p.marks.every((m) => m.x > 0 && m.x < 1));
+});
+
+test("one weight, or none in the window, draws nothing instead of a line between points", () => {
+  const now = new Date(2026, 9, 23);
+  assert.equal(weightVsSteps([{ at: "2026-10-20", lb: 200 }], [], now), null);
+  assert.equal(weightVsSteps([{ at: "2025-01-01", lb: 200 }, { at: "2025-02-01", lb: 198 }], [], now), null);
+  assert.equal(weightVsSteps([], [], now), null);
+});
 
 test("reconstitution: 5 mg in 2 mL, 250 mcg dose is 10 units on U-100", () => {
   const r = reconstitute({ vialMg: 5, waterMl: 2, doseMcg: 250, unitsPerMl: 100 })!;

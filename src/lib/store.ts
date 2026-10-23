@@ -219,6 +219,10 @@ function demoState(): State {
     unit: "mg" as const,
     schedule: { kind: "every" as const, everyDays: 7 },
     startDate: day(38).toISOString().slice(0, 10),
+    titration: [
+      { at: day(38).toISOString().slice(0, 10), dose: 2.5 },
+      { at: day(24).toISOString().slice(0, 10), dose: 5 },
+    ],
     pen: { mgPerMl: 5, unitsPerMl: 100 },
   };
   const bpc = {
@@ -247,10 +251,11 @@ function demoState(): State {
   const doses: DoseLog[] = [];
   const sites = ["Left abdomen", "Right abdomen", "Left thigh", "Right thigh"];
   for (let i = 38; i >= 0; i -= 7) {
+    // 2.5 mg for the first two weeks, then the step up the titration below records
     doses.push({
       id: `td${i}`,
       compoundId: "demo-tirz",
-      dose: 5,
+      dose: i > 24 ? 2.5 : 5,
       unit: "mg",
       at: iso(day(i, 9)),
       site: sites[((38 - i) / 7) % 4],
