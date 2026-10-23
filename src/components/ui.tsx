@@ -131,6 +131,9 @@ export function useDialog(open: boolean, onClose: () => void) {
   useEffect(() => {
     if (!open) return;
     const back = document.activeElement as HTMLElement | null;
+    const root = document.documentElement;
+    const scroll = root.style.overflow;
+    root.style.overflow = "hidden";
     panel.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") return onClose();
@@ -151,6 +154,7 @@ export function useDialog(open: boolean, onClose: () => void) {
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
+      root.style.overflow = scroll;
       back?.focus();
     };
   }, [open, onClose]);

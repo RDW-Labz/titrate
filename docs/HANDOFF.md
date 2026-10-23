@@ -87,6 +87,12 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
 2. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
    shell). Manifest shortcuts + calendar export are the web substitutes already shipped.
 
+Done: **overlay lock + update prompt** — an open overlay now freezes the page behind it (lock on
+`documentElement`, not `body`: body alone still lets the window scroll) and a swapped service worker raises a
+"New version ready → Reload" toast, but only when a worker was already controlling the page, so a first install
+stays quiet. `useByDate()` in `lib/vial.ts` is now `beyondUseDate()` — the old name read as a hook and lint
+flagged all three call sites. Lint errors 8 → 5; the rest are false positives (`useActions` really is a hook).
+
 Done: **offline shell** — `public/sw.js` is registered by `Shell` (production only). It precaches the 14 pages
 plus icons at install, serves HTML network-first (so a deploy can't go stale) and hashed `_next/static` chunks
 cache-first, and matches navigations with `ignoreSearch` so `/protocols/view/?id=` works offline. Verified by

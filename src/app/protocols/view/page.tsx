@@ -14,7 +14,7 @@ import { dayKey, cycleInfo, humanIn, isDueOn, nextDue } from "@/lib/schedule";
 import { actions, useStore } from "@/lib/store";
 import { doseOn, nextStep } from "@/lib/titration";
 import { CYCLES, SCHEDULES, cyclePresetId, schedulePresetId } from "@/lib/presets";
-import { budDaysLeft, scheduleLabel, useByDate, vialStatus } from "@/lib/vial";
+import { budDaysLeft, beyondUseDate, scheduleLabel, vialStatus } from "@/lib/vial";
 
 const localInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 
@@ -136,7 +136,7 @@ function Protocol() {
             <>
               <p className="num mt-1 text-[12.5px] text-muted">
                 {status.dosesLeft} doses left · {status.unitsPerDose ? `${Math.round(status.unitsPerDose * 2) / 2} u each` : "—"} · use by{" "}
-                {useByDate(vial).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                {beyondUseDate(vial).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                 {bud !== null && bud < 0 ? " (expired)" : ""}
               </p>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">

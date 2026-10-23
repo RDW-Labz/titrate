@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect, type ReactNode } from "react";
 import { BookIcon, ForkIcon, HomeIcon, SyringeIcon, VialIcon } from "./icons";
-import { ToastHost } from "./toast";
+import { ToastHost, toast } from "./toast";
 import { PageFade } from "./page-fade";
 import { Reminders } from "./reminders";
 import { useReady } from "@/lib/store";
@@ -60,9 +60,16 @@ export function Shell({ children }: { children: ReactNode }) {
   const ready = useReady();
   // the offline shell; Reminders also waits on navigator.serviceWorker.ready, so this wakes that up too
   useEffect(() => {
-    if (process.env.NODE_ENV === "production") {
-      navigator.serviceWorker?.register(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/sw.js`).catch(() => undefined);
-    }
+    const sw = navigator.serviceWorker;
+    if (process.env.NODE_ENV !== "production" || !sw) return;
+    // only offer a reload when an older worker was already running this page — a first install claims too
+    const hadWorker = !!sw.controller;
+    const onSwap = () => {
+      if (hadWorker) toast("New version ready", { label: "Reload", run: () => location.reload() });
+    };
+    sw.addEventListener("controllerchange", onSwap);
+    sw.register(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/sw.js`).catch(() => undefined);
+    return () => sw.removeEventListener("controllerchange", onSwap);
   }, []);
   // the store only exists in the browser; rendering pages before it loads would prerender
   // an empty protocol (and trip Next's new Date() check), so hold children until mounted

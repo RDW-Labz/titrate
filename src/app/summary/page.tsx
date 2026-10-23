@@ -6,7 +6,7 @@ import { toast } from "@/components/toast";
 import { doseOn } from "@/lib/titration";
 import { addDays, cycleInfo, dayKey, inCycle, loggedOn, scheduledOn } from "@/lib/schedule";
 import { useStore } from "@/lib/store";
-import { budDaysLeft, scheduleLabel, useByDate, vialStatus } from "@/lib/vial";
+import { budDaysLeft, beyondUseDate, scheduleLabel, vialStatus } from "@/lib/vial";
 
 export default function SummaryPage() {
   const { compounds, doses, vials, symptoms, weights, goals, foods } = useStore();
@@ -147,7 +147,7 @@ export default function SummaryPage() {
                   <td className="px-3 py-2.5 text-[12.5px]">
                     {scheduleLabel(c)}
                     <span className="block text-[11px] text-muted">
-                      {vial ? `use by ${useByDate(vial).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : "pen"}
+                      {vial ? `use by ${beyondUseDate(vial).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : "pen"}
                       {bud !== null && bud < 0 ? " · expired" : ""}
                     </span>
                   </td>

@@ -6,13 +6,13 @@ import { doseOn } from "./titration.ts";
 /** bacteriostatic water keeps a mixed vial usable for about 28 days */
 export const BUD_DAYS = 28;
 
-export function useByDate(vial: Vial): Date {
+export function beyondUseDate(vial: Vial): Date {
   return addDays(parseDay(vial.mixedOn), BUD_DAYS);
 }
 
 /** days until the vial is past its beyond-use date; negative means expired */
 export function budDaysLeft(vial: Vial, now = new Date()): number {
-  return daysBetween(now, useByDate(vial));
+  return daysBetween(now, beyondUseDate(vial));
 }
 
 export type VialStatus = {
