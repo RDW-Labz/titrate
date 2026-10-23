@@ -6,6 +6,7 @@ import { LogDot } from "@/components/log-dose";
 import { toast } from "@/components/toast";
 import { Empty } from "@/components/ui";
 import { addDays, cycleInfo, humanIn, inCycle, isDueOn, loggedOn, nextDue, scheduledOn } from "@/lib/schedule";
+import { adherencePct } from "@/lib/adherence";
 import { actions, useStore } from "@/lib/store";
 import { doseOn } from "@/lib/titration";
 import { PEPTIDE_BY_ID, PEPTIDES, halfLifeLabel } from "@/lib/peptides";
