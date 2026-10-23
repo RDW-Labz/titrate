@@ -1,6 +1,6 @@
 # Titrate — session handoff
 
-Paste this into a fresh session to resume. Written 2026-10-23 at `8015b48`.
+Paste this into a fresh session to resume. Written 2026-10-23, updated after the push to `main`.
 
 ## What it is
 
@@ -9,7 +9,7 @@ no database. All state is `localStorage` under `titrate.v1` (one-key backup in `
 progress photos are IndexedDB `titrate-photos` because images blow the 5 MB key budget.
 
 Repo `~/peptide-tracker` — Next 16.4.2, React 19, Tailwind 4, TypeScript. 47 files, ~5.9k lines in `src/`.
-63 commits; the last 51 are **local only**, nothing pushed to `RDW-Labz/titrate`.
+Pushed to `https://github.com/RDW-Labz/titrate` (private), branch `main`, nothing deployed yet.
 
 ## Run + verify
 
@@ -70,7 +70,7 @@ Server runs at `http://localhost:3000`. Test file: `scripts/selfcheck.mts` (expl
    fetch that returns OpenUI Lang is the whole change. Needs an API key + a route (breaks the no-server rule).
 2. **Accessibility pass on the new surfaces** — the bottom sheet (`SymptomSheet`) and the photo viewer have
    no focus trap; the Type it result needs `aria-live`.
-3. **Deploy** — Vercel import of `RDW-Labz/titrate`; nothing is pushed yet, so the remote is 51 commits behind.
+3. **Deploy** — Vercel import of `RDW-Labz/titrate` (repo is pushed and current).
 4. Native-only ideas deliberately unbuilt: Health sync, real home-screen widgets, push reminders (all need a
    shell). Manifest shortcuts + calendar export are the web substitutes already shipped.
 
