@@ -42,17 +42,28 @@ export default function SettingsPage() {
 
   async function restore(raw: string | null, label: string) {
     if (!raw) return toast("Nothing saved yet");
+    // a restore is the one action that overwrites everything, so keep the way back before touching anything
+    const before = state;
+    const beforePhotos = await listPhotos().catch(() => []);
     try {
       const parsed = JSON.parse(raw) as Partial<State> & { photos?: { at: string; data: string }[] };
-      const { photos, ...state } = parsed;
-      actions.replace({ ...EMPTY, ...state, goals: { ...EMPTY.goals, ...parsed.goals } });
+      const { photos, ...next } = parsed;
+      actions.replace({ ...EMPTY, ...next, goals: { ...EMPTY.goals, ...parsed.goals } });
+      const added: string[] = [];
       if (photos?.length) {
-        const have = new Set((await listPhotos()).map((p) => p.data));
+        const have = new Set(beforePhotos.map((p) => p.data));
         const fresh = photos.filter((p) => !have.has(p.data));
-        await Promise.all(fresh.map((p) => addPhoto(p.data, new Date(p.at)).catch(() => "")));
-        setPhotos((n) => n + fresh.length);
+        added.push(...(await Promise.all(fresh.map((p) => addPhoto(p.data, new Date(p.at)).catch(() => "")))));
+        setPhotos(beforePhotos.length + fresh.length);
       }
-      toast(`Restored ${label}`);
+      toast(`Restored ${label}`, {
+        label: "Undo",
+        run: async () => {
+          await Promise.all(added.filter(Boolean).map((id) => deletePhoto(id).catch(() => undefined)));
+          actions.replace(before);
+          setPhotos(beforePhotos.length);
+        },
+      });
     } catch {
       toast("That file didn't open");
     }

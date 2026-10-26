@@ -105,7 +105,8 @@ locally, serve `out/` under that prefix (a five-line Python `translate_path` shi
 Done: **the backup is a real snapshot** — Download now appends the IndexedDB photos to the JSON (they were
 silently excluded, so a new phone lost every progress photo) and Restore refills them, skipping duplicates by
 data. "Delete everything" now clears photos too, and a deleted photo offers Undo on the toast instead of being
-irreversible on one tap. Verified by round-tripping through the real file input: download → wipe both stores →
+irreversible on one tap. Restore itself snapshots the pre-restore state and the photo ids it added, so its toast
+can put both back — the wrong JSON is no longer a one-way door. Verified by round-tripping through the real file input: download → wipe both stores →
 restore → photo back with its original date.
 
 Done: **weight against titration** — the compound page shows weight over 90 days with a dashed line at every
