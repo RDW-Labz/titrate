@@ -219,14 +219,16 @@ a:focus-visible {
   transition: transform 0.36s cubic-bezier(0.3, 1.4, 0.5, 1), width 0.2s ease;
 }
 
+/* no -50% here: the element's -translate-x-1/2 already centres it, and in Tailwind v4 that is the
+   `translate` property, which composes with `transform` — keeping both shifted the toast half off-screen */
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 14px) scale(0.96);
+    transform: translateY(14px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: none;
   }
 }
 
@@ -268,11 +270,11 @@ a:focus-visible {
 @keyframes toast-out {
   from {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: none;
   }
   to {
     opacity: 0;
-    transform: translate(-50%, 8px) scale(0.97);
+    transform: translateY(8px) scale(0.97);
   }
 }
 
